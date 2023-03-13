@@ -34,12 +34,4 @@ $(function () {
         return false;
     });
 	
-    // 送信
-    $('form').submit(function () {
-	var msg = `ご連絡が遅れる場合がございますが、\n確認後に返信致します。`;
-        sendText(msg);
-
-        return false;
-    });
-	
 });
