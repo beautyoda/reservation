@@ -28,7 +28,7 @@ $(function () {
         var names = $('select[name="names"]').val();
         var inquiries = $('textarea[name="inquiries"]').val();
 	    
-        var msg = `＊＊＊ご予約内容＊＊＊\n〓希望日：〓\n ${date}\n〓時間：〓\n ${minute}\n〓メニュー：〓\n ${names}\n〓問い合わせ内容：〓\n ${inquiries}`;
+        var msg = `＊＊＊ご予約内容＊＊＊\n〓希望日〓\n ${date}\n〓時間〓\n ${minute}\n〓メニュー〓\n ${names}\n〓問い合わせ内容〓\n ${inquiries}`;
         sendText(msg);
 
         return false;
