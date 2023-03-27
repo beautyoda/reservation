@@ -19,6 +19,7 @@ $(function () {
     // 予約フォームを表示する
     $('#form-number').click(function () {
         $('#form-name').empty();
+        var namelabel = $('input[name="namelabel"]').val();
         var date = $('input[name="date"]').val();
         var num = $('input[name="number"]:checked').val();
         var minute = $('select[name="minute"]').val();
