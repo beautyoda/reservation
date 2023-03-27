@@ -29,6 +29,7 @@ $(function () {
 
     // 送信
     $('form').submit(function () {
+        var namelabel = $('input[name="namelabel"]').val();
         var date = $('input[name="date"]').val();
         var number = $('input[name="number"]:checked').val();	
         var minute = $('select[name="minute"]').val();
