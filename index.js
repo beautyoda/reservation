@@ -19,7 +19,7 @@ $(function () {
     currentBaseDate.setDate(currentBaseDate.getDate() - currentBaseDate.getDay()); // 日曜始まり
 
     const startH = 9;  
-    const endH = 17;   
+    const endH = 19;   
     let bookedSlots = [];
 
     // --- 読み込み処理 ---
