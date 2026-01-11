@@ -85,7 +85,7 @@ $(function () {
                 let checkKey = dateObj.fullDate + " " + timeStr; // 例: 2026/1/12 9:00
                 
                 // ★ここが新機能！「日付 + 終日」というデータがあるかチェック
-                let wholeDayKey = dateObj.fullDate + " 終日"; 
+                let wholeDayKey = dateObj.fullDate + " 休"; 
                 let isWholeDayOff = bookedSlots.includes(wholeDayKey);
 
                 // 各種判定
