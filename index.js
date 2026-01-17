@@ -73,10 +73,9 @@ $(function () {
         }
 
         // =================================================================
-        // ★ここを書き換えました（30分刻み対応）
+        // 30分刻みの時間リスト作成 (9:00〜17:30)
         // =================================================================
         const timeList = [];
-        // 9時から17時まで回して、:00 と :30 を作る
         for (let h = 9; h <= 17; h++) {
             timeList.push(h + ":00");
             timeList.push(h + ":30");
@@ -101,7 +100,8 @@ $(function () {
                 let isBooked = bookedSlots.includes(checkKey);
 
                 if (isMonday || isThirdTuesday || isPast || isBooked || isWholeDayOff) {
-                    row += `<td><span class="symbol-ng">×</span></td>`;
+                    // ★ここを修正！「×」も箱(div)に入れて高さを確保
+                    row += `<td><div class="time-slot-ng"><span class="symbol-ng">×</span></div></td>`;
                 } else {
                     row += `<td><div class="time-slot" data-date="${dateObj.fullDate}" data-time="${timeStr}">
                                 <span class="symbol-ok">〇</span>
