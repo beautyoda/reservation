@@ -9,7 +9,7 @@ $(function () {
 
     // ② 新しい本番用GASのURL
     // ★重要：ここを「新しいGASのURL」に書き換えてください！
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwMk2pq6GJ-_Hp2Eo_nLuXOhAqLtg6tMC6_miRcp_xj-WSDJLmXMW0fxthvt2IzuwKC/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxZc3k6RDl9sDxx40LlRLxbSjVVTyWOvVa6313gWZNgbddP1xwGtjdcRUzzGkKroZcM/exec';
 
     // =================================================================
 
