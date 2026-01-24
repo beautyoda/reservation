@@ -9,7 +9,7 @@ $(function () {
 
     // ② さっき発行した、新しいGASのURL
     // ★注意：必ずシングルクォーテーション(')で囲ってください！
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbywlF0OhNKpAMLmcD8DyM3_9Exnf_EDTMgqjQiUDR5HTVanGDvkcsme7skndOGoBfU/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwv93YTCTaP8yqsHKzbERQjn9xUxvHLJm_ndj_e22RDQU8hy4z_w8UI77eupQxh4maj/exec';
 
     // =================================================================
 
