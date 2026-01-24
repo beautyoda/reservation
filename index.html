@@ -127,10 +127,10 @@
             text-align:center; padding-top:200px; font-weight:bold;
         }
 
-        /* ★完了画面のデザイン（送っていただいた画像を再現） */
+        /* 完了画面のデザイン */
         .success-icon {
             font-size: 80px;
-            color: #555; /* 画像に合わせて濃いグレー黒系 */
+            color: #555; 
             margin-bottom: 20px;
             font-weight: bold;
         }
@@ -197,11 +197,14 @@
             <select name="names" class="form-control" required>
                 <option value="" disabled selected>選択してください</option>
                 <option value="カット">カット</option>
-                <option value="カラー">カラー</option>
-                <option value="カット＋カラー">カット＋カラー</option>
-                <option value="パーマ">パーマ</option>
+                <option value="パーマ＋カット">パーマ＋カット</option>
+                <option value="カラー＋カット">カラー＋カット</option>
                 <option value="トリートメント">トリートメント</option>
-                <option value="その他">その他</option>
+                <option value="縮毛矯正＋カット">縮毛矯正＋カット</option>
+                <option value="まつ毛カール">まつ毛カール</option>
+                <option value="まつ毛エクステ">まつ毛エクステ</option>
+                <option value="トリートメントストレートパーマ">トリートメントストレートパーマ</option>
+                <option value="着付け">着付け</option>
             </select>
         </div>
         
@@ -231,14 +234,11 @@
 
 <div class="container" id="success-area" style="display:none; text-align:center; padding-top:80px;">
     <div class="success-icon">✔</div>
-    
     <div class="success-title">予約を受け付けました</div>
-    
     <div class="success-msg">
         ご予約ありがとうございます。<br>
         確認後、ご連絡いたします。
     </div>
-    
     <button onclick="liff.closeWindow();" class="btn btn-gray">閉じる / 戻る</button>
 </div>
 
@@ -246,7 +246,7 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="index.js?v=restore-original-design"></script> 
+<script src="index.js?v=menu-restored"></script> 
 
 </body>
 </html>
