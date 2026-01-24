@@ -13,7 +13,7 @@
             color: #333;
         }
 
-        /* ★ここを調整：左右に約3mm(12px)の余白を確保 */
+        /* 左右に約3mm(12px)の余白 */
         .container {
             padding-left: 12px;
             padding-right: 12px;
@@ -26,9 +26,7 @@
             margin-bottom: 25px;
         }
 
-        /* =========================================
-           カレンダー（表）のスタイル
-           ========================================= */
+        /* カレンダー（表） */
         .table-responsive {
             border: none;
             margin-bottom: 1rem;
@@ -48,8 +46,6 @@
             height: 45px;
             border: 1px solid #dee2e6;
         }
-        
-        /* 時間の列 */
         .table th:first-child, .table td:first-child {
             width: 45px;
             background-color: #f1f1f1;
@@ -79,8 +75,6 @@
             background-color: #28a745 !important;
             color: #fff !important;
         }
-
-        /* 曜日ごとの色 */
         .text-danger { color: #dc3545 !important; }
         .text-primary { color: #007bff !important; }
 
@@ -97,9 +91,7 @@
             font-weight: bold;
         }
 
-        /* =========================================
-           入力フォームのスタイル
-           ========================================= */
+        /* 入力フォーム */
         label {
             font-weight: bold;
             font-size: 1rem;
@@ -161,9 +153,7 @@
 
         <div class="table-responsive">
             <table class="table table-bordered">
-                <thead>
-                    <tr id="dateHeader"></tr>
-                </thead>
+                <thead><tr id="dateHeader"></tr></thead>
                 <tbody id="timeBody"></tbody>
             </table>
         </div>
@@ -215,15 +205,15 @@
 
 <div class="container" id="success-area" style="display:none; text-align:center; padding-top:50px;">
     <h3 class="text-success">予約完了</h3>
-    <p class="mt-3" style="font-size: 1.1rem;">ご予約ありがとうございました。<br>確認メッセージを送信しました。</p>
-    <button onclick="liff.closeWindow();" class="btn btn-outline-secondary mt-5 btn-lg">閉じる</button>
+    <p class="mt-3">ご予約ありがとうございました。<br>確認メッセージを送信しました。</p>
+    <button onclick="liff.closeWindow();" class="btn btn-outline-secondary mt-4">閉じる</button>
 </div>
 
 <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="index.js?v=20260124-an"></script> 
+<script src="index.js?v=restore-x-layout"></script> 
 
 </body>
 </html>
