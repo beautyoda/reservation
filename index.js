@@ -4,12 +4,12 @@ $(function () {
     // =================================================================
     
     // ① 奥様の公式LINEのLIFF ID
-    // ★重要：ここを必ず「本番用のLIFF ID」に書き換えてください！
+    // （例：1657771746-xxxxxxx）
     const MY_LIFF_ID = "1660734162-KM7yyz77"; 
 
-    // ② 新しい本番用GASのURL
-    // ★重要：ここを「新しいGASのURL」に書き換えてください！
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxZc3k6RDl9sDxx40LlRLxbSjVVTyWOvVa6313gWZNgbddP1xwGtjdcRUzzGkKroZcM/exec';
+    // ② さっき発行した、新しいGASのURL
+    // ★注意：必ずシングルクォーテーション(')で囲ってください！
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzAFuyeJMDw1yTZi2uNuOiNC6YDcSAlHFm13glWJh1ZHN2KvqbcE24r9A8m1Qm5SI3-/exec';
 
     // =================================================================
 
@@ -52,18 +52,21 @@ $(function () {
     currentBaseDate.setDate(currentBaseDate.getDate() - currentBaseDate.getDay());
     let bookedSlots = [];
 
+    // ★読み込み処理
     function fetchAndRender() {
         $('#loadingMsg').show();
         const bustCache = '?t=' + new Date().getTime();
+        
         fetch(GAS_API_URL + bustCache)
             .then(response => response.json())
             .then(data => {
+                console.log("取得データ:", data); // 確認用ログ
                 bookedSlots = data;
                 renderCalendar(currentBaseDate);
                 $('#loadingMsg').hide();
             })
             .catch(error => {
-                console.error(error);
+                console.error("読み込みエラー:", error);
                 renderCalendar(currentBaseDate);
                 $('#loadingMsg').hide();
             });
@@ -104,7 +107,7 @@ $(function () {
             $body.append(row + '</tr>');
         });
     }
-    fetchAndRender();
+    fetchAndRender(); // 初回実行
 
     $('#prevWeek').on('click', function(e){ e.preventDefault(); currentBaseDate.setDate(currentBaseDate.getDate() - 7); renderCalendar(currentBaseDate); });
     $('#nextWeek').on('click', function(e){ e.preventDefault(); currentBaseDate.setDate(currentBaseDate.getDate() + 7); renderCalendar(currentBaseDate); });
@@ -132,7 +135,7 @@ $(function () {
         submitted = true;
         $('input[type="submit"]').prop('disabled', true).val('送信中...');
         
-        // 2秒後に強制完了
+        // 2秒後に強制完了画面へ
         setTimeout(function(){
             if(submitted) {
                 console.log("タイムアウト：強制完了");
@@ -147,7 +150,7 @@ $(function () {
         }
     });
 
-    // ★完了画面＆メッセージ送信（ここを修正しました）
+    // ★完了画面＆メッセージ送信
     function showSuccessScreen() {
         if (!submitted) return; 
         submitted = false; 
@@ -158,4 +161,20 @@ $(function () {
 
         if (isLineApp) {
             var namelabel = $('input[name="namelabel"]').val();
-            var date = $('#selected_date
+            var date = $('#selected_date').val();
+            var minute = $('#selected_time').val();
+            var names = $('select[name="names"]').val();
+            var inquiries = $('textarea[name="inquiries"]').val();
+
+            var msg = `＊＊ご予約内容＊＊\nお名前：\n${namelabel}\n希望日：\n${date}\n時間：\n${minute}\nメニュー：\n${names}\n問い合わせ内容：\n${inquiries}`;
+            
+            liff.sendMessages([{ 'type': 'text', 'text': msg }])
+                .then(function () { 
+                    setTimeout(function(){ liff.closeWindow(); }, 2000);
+                })
+                .catch(function (error) {
+                    console.log("LINE送信失敗:", error);
+                });
+        }
+    }
+});
