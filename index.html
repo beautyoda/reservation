@@ -7,101 +7,116 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: "Helvetica Neue", Arial, sans-serif;
             background-color: #f8f9fa;
-            padding-top: 10px;
-            padding-bottom: 40px;
-        }
-        h4 {
-            font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #333;
+            padding-top: 20px;
+            padding-bottom: 50px;
         }
         
-        /* ★スマホ対応：画面からはみ出さないための設定 */
+        /* ★コンテナ：スマホ画面のギリギリまで使う設定 */
         .container {
             padding-left: 5px;
             padding-right: 5px;
-            max-width: 100%;
+            max-width: 600px; /* PCで見ても広がりすぎないように */
         }
-        .table-responsive {
-            margin-bottom: 15px;
-            border: none;
-        }
-        .table {
-            table-layout: fixed; /* 列の幅を固定して崩れないようにする */
-            width: 100%;
-            margin-bottom: 0;
-        }
-        
-        /* 表のマス目をギュッと小さくする */
-        .table th, .table td {
+
+        h4 {
+            margin-bottom: 20px;
             text-align: center;
-            vertical-align: middle;
-            padding: 4px 0px !important; /* 余白をゼロに */
-            font-size: 10px; /* 文字を小さく */
-            height: 40px;    /* 高さを統一 */
-            border: 1px solid #dee2e6;
-        }
-        
-        /* 時間の列だけ少し幅を持たせる */
-        .table th:first-child, .table td:first-child {
-            width: 40px; 
-            background-color: #f1f1f1;
             font-weight: bold;
         }
 
-        /* 〇×のマス */
+        /* =========================================
+           ★カレンダー（表）のスタイル調整
+           ここだけは「横幅に収める」ために調整しています
+           ========================================= */
+        .table-responsive {
+            border: none;
+            margin-bottom: 1rem;
+        }
+        .table {
+            table-layout: fixed; /* 列幅を固定 */
+            width: 100%;
+            background-color: #fff;
+            margin-bottom: 0;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 5px 0px !important; /* 横の余白を削って収める */
+            font-size: 11px; /* カレンダーの中だけ少し文字を調整 */
+            height: 45px;
+            border: 1px solid #dee2e6;
+        }
+        /* 時間の列（一番左） */
+        .table th:first-child, .table td:first-child {
+            width: 45px;
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        
+        /* 〇と×のマス目デザイン */
         .time-slot, .time-slot-ng {
             height: 100%;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
         }
         .time-slot {
-            background-color: #ffffff;
             cursor: pointer;
             color: #28a745; 
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px; /* 〇は大きく見やすく */
         }
         .time-slot-ng {
-            background-color: #f8f9fa;
+            background-color: #f9f9f9;
             color: #ccc;
         }
-        
-        /* 選択されたマス */
         .selected-slot {
             background-color: #28a745 !important;
             color: #fff !important;
         }
 
         /* 曜日ごとの色 */
-        .text-danger { color: #dc3545 !important; } /* 日曜・祝日 */
-        .text-primary { color: #007bff !important; } /* 土曜 */
-        
-        /* フォーム周り */
-        label { font-size: 0.9rem; font-weight: bold; margin-top: 10px;}
-        .required-badge {
-            background-color: #dc3545; color: white;
-            font-size: 0.7rem; padding: 2px 5px;
-            border-radius: 3px; vertical-align: middle; margin-left: 5px;
-        }
-        .btn-block { padding: 12px; font-size: 1.1rem; font-weight: bold; }
-        
-        /* 週移動ボタン */
-        .week-nav {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; padding: 0 5px;
-        }
-        .week-nav button { font-size: 0.85rem; padding: 5px 10px; }
-        .month-label { font-weight: bold; font-size: 1.1rem; }
+        .text-danger { color: #dc3545 !important; }
+        .text-primary { color: #007bff !important; }
 
-        /* ロード中表示 */
+        /* 週移動ボタンエリア */
+        .week-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+        .month-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* =========================================
+           その他フォーム要素（標準サイズに戻しました）
+           ========================================= */
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .required-badge {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .btn-lg-block {
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* ロード中画面 */
         #loadingMsg {
             display:none; position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(255,255,255,0.8); z-index:9999;
@@ -119,40 +134,41 @@
 <div class="container" id="booking-form">
     <h4>予約フォーム</h4>
 
-    <div class="week-nav">
-        <button id="prevWeek" class="btn btn-outline-secondary">&lt; 前の週</button>
-        <span id="currentMonthDisplay" class="month-label">1月</span>
-        <button id="nextWeek" class="btn btn-primary">次の週 &gt;</button>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
-                <tr id="dateHeader">
-                    </tr>
-            </thead>
-            <tbody id="timeBody">
-                </tbody>
-        </table>
-    </div>
-    
-    <div class="text-center text-muted mb-3" style="font-size:0.8rem;">
-        ※「〇」をタップして時間を選択してください
-    </div>
-
     <form method="post" target="hidden_iframe" onsubmit="return false;">
+        
+        <div class="form-group">
+            <label>お名前<span class="required-badge">必須</span></label>
+            <input type="text" name="namelabel" class="form-control form-control-lg" placeholder="BEAUTY SALON ODA" required>
+        </div>
+
+        <hr>
+
+        <div class="week-nav">
+            <button id="prevWeek" class="btn btn-outline-secondary">&lt; 前の週</button>
+            <span id="currentMonthDisplay" class="month-label">1月</span>
+            <button id="nextWeek" class="btn btn-primary">次の週 &gt;</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr id="dateHeader"></tr>
+                </thead>
+                <tbody id="timeBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="text-center text-muted mb-4">
+            <small>※「〇」をタップして時間を選択してください</small>
+        </div>
+
         <input type="hidden" id="selected_date" name="date">
         <input type="hidden" id="selected_time" name="minute">
 
         <div class="form-group">
-            <label>お名前<span class="required-badge">必須</span></label>
-            <input type="text" name="namelabel" class="form-control" placeholder="山田 花子" required>
-        </div>
-
-        <div class="form-group">
             <label>メニュー<span class="required-badge">必須</span></label>
-            <select name="names" class="form-control" required>
-                <option value="" disabled selected>選択してください</option>
+            <select name="names" class="form-control form-control-lg" required>
+                <option value="" disabled selected>メニューを選択してください</option>
                 <option value="カット">カット</option>
                 <option value="カラー">カラー</option>
                 <option value="カット＋カラー">カット＋カラー</option>
@@ -164,7 +180,7 @@
         
         <div class="form-group">
             <label>お問い合わせ</label>
-            <textarea name="inquiries" class="form-control" rows="3" placeholder="ご質問などあればご記入ください"></textarea>
+            <textarea name="inquiries" class="form-control" rows="3" placeholder="ご要望などがあればご記入ください"></textarea>
         </div>
 
         <div id="web-contact-area" style="display:none;">
@@ -178,25 +194,27 @@
             </div>
         </div>
 
-        <div id="line-urgent-msg" style="display:none; font-size:0.8rem; color:#666; margin-bottom:10px;">
+        <div id="line-urgent-msg" style="display:none; font-size:0.85rem; color:#666; margin-bottom:15px;">
             ※ご連絡先はLINEアカウント情報を参照します
         </div>
 
-        <input type="submit" class="btn btn-success btn-block" value="予約を確定する">
+        <div class="mt-4">
+            <input type="submit" class="btn btn-success btn-block btn-lg-block" value="予約を確定する">
+        </div>
     </form>
 </div>
 
 <div class="container" id="success-area" style="display:none; text-align:center; padding-top:50px;">
     <h3 class="text-success">予約完了</h3>
-    <p class="mt-3">ご予約ありがとうございました。<br>確認メッセージを送信しました。</p>
-    <button onclick="liff.closeWindow();" class="btn btn-outline-secondary mt-4">閉じる</button>
+    <p class="mt-3 lead">ご予約ありがとうございました。<br>確認メッセージを送信しました。</p>
+    <button onclick="liff.closeWindow();" class="btn btn-outline-secondary mt-5 btn-lg">閉じる</button>
 </div>
 
 <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="index.js?v=20260124-fin"></script> 
+<script src="index.js?v=20260124-v3"></script> 
 
 </body>
 </html>
