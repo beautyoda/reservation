@@ -7,7 +7,7 @@ $(function () {
     // ★重要：ここを必ず「本番用のLIFF ID」に書き換えてください！
     const MY_LIFF_ID = "1660734162-KM7yyz77"; 
 
-    // ② さっき発行した、新しい本番用GASのURL
+    // ② 新しい本番用GASのURL
     // ★重要：ここを「新しいGASのURL」に書き換えてください！
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwMk2pq6GJ-_Hp2Eo_nLuXOhAqLtg6tMC6_miRcp_xj-WSDJLmXMW0fxthvt2IzuwKC/exec';
 
@@ -15,29 +15,25 @@ $(function () {
 
     $('form').attr('action', GAS_API_URL);
     
-    // スマホ判定（LINEアプリか、それ以外か）
+    // スマホ判定
     const isLineApp = navigator.userAgent.toLowerCase().indexOf('line') !== -1;
 
-    // LIFF初期化＆Web/LINEの画面出し分け
+    // LIFF初期化
     if (typeof liff !== 'undefined') {
         liff.init({ liffId: MY_LIFF_ID }).then(() => {
             if (isLineApp) {
-                // LINEの場合：電話・メアド欄を隠す
                 $('#web-contact-area').hide();
                 $('#line-urgent-msg').show();
                 $('input[name="user_email"]').prop('required', false);
                 $('input[name="user_phone"]').prop('required', false);
                 
-                // ログインチェック
                 if (!liff.isLoggedIn()) {
                     liff.login();
                 }
             } else {
-                // Webの場合：全部出す
                 showWebFields();
             }
         }).catch(err => {
-            // エラー時もLINEじゃなければWeb欄を出す
             if (!isLineApp) showWebFields();
         });
     } else {
@@ -118,7 +114,7 @@ $(function () {
     });
 
     // =================================================================
-    // ★送信処理（ここがフリーズ防止のキモです！）
+    // 送信処理
     // =================================================================
     let submitted = false;
     $('form').submit(function (e) {
@@ -136,7 +132,7 @@ $(function () {
         submitted = true;
         $('input[type="submit"]').prop('disabled', true).val('送信中...');
         
-        // ★2秒後に強制的に「完了画面」へ切り替える（フリーズ防止安全装置）
+        // 2秒後に強制完了
         setTimeout(function(){
             if(submitted) {
                 console.log("タイムアウト：強制完了");
@@ -151,33 +147,15 @@ $(function () {
         }
     });
 
-    // ★完了画面への切り替え処理
+    // ★完了画面＆メッセージ送信（ここを修正しました）
     function showSuccessScreen() {
         if (!submitted) return; 
         submitted = false; 
 
-        // フォームを消して、完了画面を出す
         $('#booking-form').hide();
         $('#success-area').show();
         window.scrollTo(0, 0);
 
         if (isLineApp) {
-            // LINEメッセージ送信（裏側でこっそりやる）
             var namelabel = $('input[name="namelabel"]').val();
-            var date = $('#selected_date').val();
-            var minute = $('#selected_time').val();
-            var names = $('select[name="names"]').val();
-            var msg = `＊＊ご予約内容＊＊\nお名前：\n${namelabel}\n希望日：\n${date}\n時間：\n${minute}\nメニュー：\n${names}`;
-            
-            // 送信トライ
-            liff.sendMessages([{ 'type': 'text', 'text': msg }])
-                .then(function () { 
-                    console.log("LINE送信成功");
-                    setTimeout(function(){ liff.closeWindow(); }, 2000);
-                })
-                .catch(function (error) {
-                    console.log("LINE送信失敗:", error);
-                });
-        }
-    }
-});
+            var date = $('#selected_date
