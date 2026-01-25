@@ -6,152 +6,30 @@
     <title>予約フォーム</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-            padding-top: 20px;
-            padding-bottom: 50px;
-            color: #333;
-        }
-
-        /* 左右に約3mm(12px)の余白 */
-        .container {
-            padding-left: 12px;
-            padding-right: 12px;
-            max-width: 600px;
-        }
-
-        h4 {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-
-        /* カレンダー（表） */
-        .table-responsive {
-            border: none;
-            margin-bottom: 1rem;
-            overflow-x: auto;
-        }
-        .table {
-            table-layout: fixed;
-            width: 100%;
-            background-color: #fff;
-            margin-bottom: 0;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-            padding: 4px 0px !important; 
-            font-size: 11px;
-            height: 45px;
-            border: 1px solid #dee2e6;
-        }
-        .table th:first-child, .table td:first-child {
-            width: 45px;
-            background-color: #f1f1f1;
-            font-weight: bold;
-            font-size: 10px;
-        }
-        
-        /* 〇と× */
-        .time-slot, .time-slot-ng {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .time-slot {
-            cursor: pointer;
-            color: #28a745; 
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .time-slot-ng {
-            background-color: #f9f9f9;
-            color: #ccc;
-        }
-        .selected-slot {
-            background-color: #28a745 !important;
-            color: #fff !important;
-        }
+        body { background-color: #f8f9fa; padding-top: 20px; padding-bottom: 50px; color: #333; }
+        .container { padding-left: 12px; padding-right: 12px; max-width: 600px; }
+        h4 { text-align: center; font-weight: bold; margin-bottom: 25px; }
+        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; }
+        .table { table-layout: fixed; width: 100%; background-color: #fff; margin-bottom: 0; }
+        .table th, .table td { text-align: center; vertical-align: middle; padding: 4px 0px !important; font-size: 11px; height: 45px; border: 1px solid #dee2e6; }
+        .table th:first-child, .table td:first-child { width: 45px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; }
+        .time-slot, .time-slot-ng { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; }
+        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; }
+        .time-slot-ng { background-color: #f9f9f9; color: #ccc; }
+        .selected-slot { background-color: #28a745 !important; color: #fff !important; }
         .text-danger { color: #dc3545 !important; }
         .text-primary { color: #007bff !important; }
-
-        /* 週移動ボタン */
-        .week-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 0 2px;
-        }
-        .month-label {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        /* 入力フォーム */
-        label {
-            font-weight: bold;
-            font-size: 1rem;
-            margin-top: 15px;
-        }
-        .required-badge {
-            background-color: #dc3545;
-            color: white;
-            font-size: 0.75rem;
-            padding: 3px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-        .form-control {
-            height: calc(1.5em + 1rem + 2px);
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-        }
-        
-        /* 送信ボタン */
-        .btn-block {
-            padding: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-top: 30px;
-        }
-
-        /* ロード中画面 */
-        #loadingMsg {
-            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(255,255,255,0.8); z-index:9999;
-            text-align:center; padding-top:200px; font-weight:bold;
-        }
-
-        /* 完了画面のデザイン */
-        .success-icon {
-            font-size: 80px;
-            color: #555; 
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        .success-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .success-msg {
-            font-size: 1rem;
-            line-height: 1.8;
-            margin-bottom: 40px;
-        }
-        .btn-gray {
-            background-color: #6c757d;
-            color: white;
-            padding: 10px 30px;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
+        .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 2px; }
+        .month-label { font-size: 1.2rem; font-weight: bold; }
+        label { font-weight: bold; font-size: 1rem; margin-top: 15px; }
+        .required-badge { background-color: #dc3545; color: white; font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+        .form-control { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1rem; }
+        .btn-block { padding: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; }
+        #loadingMsg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; text-align:center; padding-top:200px; font-weight:bold; }
+        .success-icon { font-size: 80px; color: #555; margin-bottom: 20px; font-weight: bold; }
+        .success-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .success-msg { font-size: 1rem; line-height: 1.8; margin-bottom: 40px; }
+        .btn-gray { background-color: #6c757d; color: white; padding: 10px 30px; border-radius: 5px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -246,7 +124,7 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="index.js?v=menu11-restored"></script> 
+<script src="index.js"></script>
 
 </body>
 </html>
