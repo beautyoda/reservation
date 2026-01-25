@@ -1,14 +1,12 @@
 $(function () {
     // =================================================================
-    // ★設定エリア（ここだけ書き換えてください！）
+    // ★設定エリア
     // =================================================================
     
     // ① 奥様の公式LINEのLIFF ID
-    // （例：1657771746-xxxxxxx）
     const MY_LIFF_ID = "1660734162-KM7yyz77"; 
 
-    // ② さっき発行した、新しいGASのURL
-    // ★注意：必ずシングルクォーテーション(')で囲ってください！
+    // ② GASのURL
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxZIOCiGT5Khm04jCRy4XM_C-C_5hectxzqzGzRZMkuKF4Kz6TOo8vNJLa4RsLSk7JQ/exec';
 
     // =================================================================
@@ -52,7 +50,6 @@ $(function () {
     $('#form-number').click(function () { $('#form-name').empty(); });
     let currentBaseDate = new Date();
     // 常に「今日」からスタートするように調整（日曜始まりではない）
-    // ※カレンダーの左端を日曜日に合わせたい場合は以下の行を有効に
     // currentBaseDate.setDate(currentBaseDate.getDate() - currentBaseDate.getDay());
     
     let bookedSlots = [];
@@ -129,11 +126,11 @@ $(function () {
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // 時間枠を作る (9:00 - 17:30)
+        // ★★★ 時間枠を作る (9:00 - 18:00、1時間間隔) ★★★
         const timeList = [];
-        for (let h = 9; h <= 17; h++) { 
+        for (let h = 9; h <= 18; h++) { 
             timeList.push(h + ":00"); 
-            timeList.push(h + ":30"); 
+            // timeList.push(h + ":30"); // 30分刻みは削除
         }
 
         timeList.forEach(timeStr => {
