@@ -33,7 +33,6 @@ $(function () {
                 showWebFields();
             }
         }).catch(err => {
-            // エラー時もWebとして動かす
             if (!isLineApp) showWebFields();
         });
     } else {
@@ -49,7 +48,7 @@ $(function () {
     // カレンダー設定
     $('#form-number').click(function () { $('#form-name').empty(); });
     let currentBaseDate = new Date();
-    // 常に「今日」からスタートするように調整（日曜始まりではない）
+    // 常に「今日」からスタートするように調整（必要なら有効化）
     // currentBaseDate.setDate(currentBaseDate.getDate() - currentBaseDate.getDay());
     
     let bookedSlots = [];
@@ -68,12 +67,12 @@ $(function () {
             })
             .catch(error => {
                 console.error("読み込みエラー:", error);
-                renderCalendar(currentBaseDate); // エラーでもカレンダーは出す
+                renderCalendar(currentBaseDate);
                 $('#loadingMsg').hide();
             });
     }
 
-    // ★カレンダー描画機能（定休日対応版）
+    // ★カレンダー描画機能
     function renderCalendar(baseDate) {
         const $header = $('#dateHeader');
         const $body = $('#timeBody');
@@ -85,27 +84,23 @@ $(function () {
 
         $('#currentMonthDisplay').text((baseDate.getMonth() + 1) + "月");
 
-        // 1週間分の日付データを作る
+        // 1週間分の日付データ
         let weekDates = [];
         let tempDate = new Date(baseDate);
         
-        // もし「左端は必ず日曜日」にしたい場合は、ここで調整する
-        let dayOfWeek = tempDate.getDay();
-        tempDate.setDate(tempDate.getDate() - dayOfWeek); // 日曜日まで戻る
+        // 左端の曜日調整（必要なら有効化）
+        // let dayOfWeek = tempDate.getDay();
+        // tempDate.setDate(tempDate.getDate() - dayOfWeek); 
 
         for (let i = 0; i < 7; i++) {
             let m = tempDate.getMonth() + 1; 
             let d = tempDate.getDate(); 
-            let w = tempDate.getDay(); // 0(日)～6(土)
+            let w = tempDate.getDay(); 
             let fullDate = `${tempDate.getFullYear()}/${m}/${d}`; 
             
-            // ★定休日判定ロジック
+            // ★定休日判定（月曜＆第3火曜）
             let isHoliday = false;
-            
-            // 1. 毎週月曜 (w === 1)
             if (w === 1) isHoliday = true;
-
-            // 2. 第3火曜 (w === 2 かつ 日付が15～21の間)
             if (w === 2 && d >= 15 && d <= 21) isHoliday = true;
 
             weekDates.push({ 
@@ -117,20 +112,19 @@ $(function () {
 
             // ヘッダーの色付け
             let colorClass = '';
-            if (w === 0) colorClass = 'text-danger'; // 日曜
-            else if (w === 6) colorClass = 'text-primary'; // 土曜
-            else if (isHoliday) colorClass = 'text-danger'; // 定休日も赤文字
+            if (w === 0) colorClass = 'text-danger';
+            else if (w === 6) colorClass = 'text-primary';
+            else if (isHoliday) colorClass = 'text-danger';
 
             $header.append(`<th class="${colorClass}">${d}<br><small>(${days[w]})</small></th>`);
             
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // ★★★ 時間枠を作る (9:00 - 18:00、1時間間隔) ★★★
+        // ★★★ 時間枠を作る (9:00 - 18:00 1時間刻み) ★★★
         const timeList = [];
         for (let h = 9; h <= 18; h++) { 
             timeList.push(h + ":00"); 
-            // timeList.push(h + ":30"); // 30分刻みは削除
         }
 
         timeList.forEach(timeStr => {
@@ -145,11 +139,9 @@ $(function () {
                 if (dateObj.isHoliday || bookedSlots.includes(wholeDayKey) || bookedSlots.includes(checkKey) || dObj < now) {
                     
                     let content = '<span class="symbol-ng">×</span>';
-                    // 定休日は「休」と表示して区別する
                     if (dateObj.isHoliday) {
                         content = '<span class="symbol-ng" style="color:#ff9999; font-size:10px;">休</span>';
                     }
-
                     row += `<td><div class="time-slot-ng">${content}</div></td>`;
                 } else {
                     row += `<td><div class="time-slot" data-date="${dateObj.fullDate}" data-time="${timeStr}"><span class="symbol-ok">〇</span></div></td>`;
@@ -198,7 +190,6 @@ $(function () {
         submitted = true;
         $('input[type="submit"]').prop('disabled', true).val('送信中...');
         
-        // 2秒後に強制完了画面へ
         setTimeout(function(){
             if(submitted) {
                 showSuccessScreen();
