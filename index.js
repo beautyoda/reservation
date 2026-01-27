@@ -2,22 +2,13 @@ $(function () {
     // =================================================================
     // ★設定エリア
     // =================================================================
-    
-    // ① 奥様の公式LINEのLIFF ID
     const MY_LIFF_ID = "1660734162-KM7yyz77"; 
-
-    // ② GASのURL
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzfqsqHIkoWnptl9xF2N9G9Z7mVQp0hvKW-5m1uMgcL3GSrlEtbz0twpXv-OeYzPQpS/exec';
-
     // =================================================================
 
-    // フォームの送信先を設定
     $('form').attr('action', GAS_API_URL);
-    
-    // スマホ判定
     const isLineApp = navigator.userAgent.toLowerCase().indexOf('line') !== -1;
 
-    // LIFF初期化
     if (typeof liff !== 'undefined') {
         liff.init({ liffId: MY_LIFF_ID }).then(() => {
             if (isLineApp) {
@@ -25,16 +16,11 @@ $(function () {
                 $('#line-urgent-msg').show();
                 $('input[name="user_email"]').prop('required', false);
                 $('input[name="user_phone"]').prop('required', false);
-                
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                }
+                if (!liff.isLoggedIn()) liff.login();
             } else {
                 showWebFields();
             }
-        }).catch(err => {
-            if (!isLineApp) showWebFields();
-        });
+        }).catch(err => { if (!isLineApp) showWebFields(); });
     } else {
         if (!isLineApp) showWebFields();
     }
@@ -45,15 +31,14 @@ $(function () {
         $('input[name="user_phone"]').prop('required', true);
     }
 
-    // カレンダー設定
     $('#form-number').click(function () { $('#form-name').empty(); });
+    
+    // ★カレンダー基準日設定
     let currentBaseDate = new Date();
-    // 常に「今日」からスタートするように調整（必要なら有効化）
-    // currentBaseDate.setDate(currentBaseDate.getDate() - currentBaseDate.getDay());
     
     let bookedSlots = [];
 
-    // ★読み込み処理
+    // ★読み込み処理（キャッシュ対策済み）
     function fetchAndRender() {
         $('#loadingMsg').show();
         const bustCache = '?t=' + new Date().getTime();
@@ -82,35 +67,42 @@ $(function () {
         $header.empty().append('<th>時間</th>'); 
         $body.empty();
 
-        $('#currentMonthDisplay').text((baseDate.getMonth() + 1) + "月");
-
-        // 1週間分の日付データ
-        let weekDates = [];
+        // ★ここで「その週の日曜日」まで戻す（日曜日始まりにする）
         let tempDate = new Date(baseDate);
-        
-        // 左端の曜日調整（必要なら有効化）
-        // let dayOfWeek = tempDate.getDay();
-        // tempDate.setDate(tempDate.getDate() - dayOfWeek); 
+        let dayOfWeek = tempDate.getDay();
+        tempDate.setDate(tempDate.getDate() - dayOfWeek); 
 
+        // 月の表示（日曜日の日付を基準に月を表示）
+        $('#currentMonthDisplay').text((tempDate.getMonth() + 1) + "月");
+
+        // 1週間分の日付データ作成
+        let weekDates = [];
         for (let i = 0; i < 7; i++) {
             let m = tempDate.getMonth() + 1; 
             let d = tempDate.getDate(); 
             let w = tempDate.getDay(); 
-            let fullDate = `${tempDate.getFullYear()}/${m}/${d}`; 
             
-            // ★定休日判定（月曜＆第3火曜）
+            // シンプルな日付（1/1）
+            let fullDateSimple = `${tempDate.getFullYear()}/${m}/${d}`; 
+            // 0埋めした日付（01/01）←スプレッドシート対策
+            let mm = ("0" + m).slice(-2);
+            let dd = ("0" + d).slice(-2);
+            let fullDatePadded = `${tempDate.getFullYear()}/${mm}/${dd}`;
+
+            // 定休日判定（月曜＆第3火曜）
             let isHoliday = false;
             if (w === 1) isHoliday = true;
             if (w === 2 && d >= 15 && d <= 21) isHoliday = true;
 
             weekDates.push({ 
-                fullDate: fullDate, 
+                fullDateSimple: fullDateSimple,
+                fullDatePadded: fullDatePadded,
                 isHoliday: isHoliday,
                 day: d,
                 weekParam: w 
             });
 
-            // ヘッダーの色付け
+            // ヘッダー装飾
             let colorClass = '';
             if (w === 0) colorClass = 'text-danger';
             else if (w === 6) colorClass = 'text-primary';
@@ -121,7 +113,7 @@ $(function () {
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // ★★★ 時間枠を作る (9:00 - 18:00 1時間刻み) ★★★
+        // 時間枠（9:00 - 18:00）
         const timeList = [];
         for (let h = 9; h <= 18; h++) { 
             timeList.push(h + ":00"); 
@@ -131,27 +123,31 @@ $(function () {
             let row = `<tr><td class="bg-light font-weight-bold" style="font-size:10px;">${timeStr}</td>`;
             
             weekDates.forEach((dateObj) => {
-                let dObj = new Date(dateObj.fullDate + " " + timeStr);
-                let checkKey = dateObj.fullDate + " " + timeStr;
-                let wholeDayKey = dateObj.fullDate + " 休"; 
+                let dObj = new Date(dateObj.fullDateSimple + " " + timeStr);
                 
-                // 定休日、または予約済み、または過去なら「×」
-                if (dateObj.isHoliday || bookedSlots.includes(wholeDayKey) || bookedSlots.includes(checkKey) || dObj < now) {
-                    
+                // ★判定キーを2パターン作る（1/1 10:00 と 01/01 10:00）
+                let checkKeySimple = dateObj.fullDateSimple + " " + timeStr;
+                let checkKeyPadded = dateObj.fullDatePadded + " " + timeStr;
+                let wholeDayKey = dateObj.fullDateSimple + " 休"; 
+
+                // どちらかのキーがスプレッドシートにあれば「×」にする
+                let isBooked = bookedSlots.includes(checkKeySimple) || bookedSlots.includes(checkKeyPadded) || bookedSlots.includes(wholeDayKey);
+
+                if (dateObj.isHoliday || isBooked || dObj < now) {
                     let content = '<span class="symbol-ng">×</span>';
                     if (dateObj.isHoliday) {
                         content = '<span class="symbol-ng" style="color:#ff9999; font-size:10px;">休</span>';
                     }
                     row += `<td><div class="time-slot-ng">${content}</div></td>`;
                 } else {
-                    row += `<td><div class="time-slot" data-date="${dateObj.fullDate}" data-time="${timeStr}"><span class="symbol-ok">〇</span></div></td>`;
+                    row += `<td><div class="time-slot" data-date="${dateObj.fullDateSimple}" data-time="${timeStr}"><span class="symbol-ok">〇</span></div></td>`;
                 }
             });
             $body.append(row + '</tr>');
         });
     }
 
-    fetchAndRender(); // 初回実行
+    fetchAndRender(); 
 
     // 週移動ボタン
     $('#prevWeek').on('click', function(e){ 
@@ -165,7 +161,7 @@ $(function () {
         renderCalendar(currentBaseDate); 
     });
 
-    // 時間選択クリック
+    // 時間選択
     $(document).on('click', '.time-slot', function() {
         $('.selected-slot').removeClass('selected-slot'); 
         $(this).addClass('selected-slot');
@@ -203,7 +199,6 @@ $(function () {
         }
     });
 
-    // 完了画面＆LINEメッセージ送信
     function showSuccessScreen() {
         if (!submitted) return; 
         submitted = false; 
