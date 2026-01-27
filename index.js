@@ -7,7 +7,7 @@ $(function () {
     const MY_LIFF_ID = "1660734162-KM7yyz77"; 
 
     // ② GASのURL
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxZIOCiGT5Khm04jCRy4XM_C-C_5hectxzqzGzRZMkuKF4Kz6TOo8vNJLa4RsLSk7JQ/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzfqsqHIkoWnptl9xF2N9G9Z7mVQp0hvKW-5m1uMgcL3GSrlEtbz0twpXv-OeYzPQpS/exec';
 
     // =================================================================
 
