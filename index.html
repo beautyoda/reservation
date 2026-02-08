@@ -6,34 +6,24 @@
     <title>予約フォーム</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* ★カズさんのオリジナルデザイン（絶対に変えません）★ */
         body { background-color: #f8f9fa; padding-top: 20px; padding-bottom: 50px; color: #333; }
         .container { padding-left: 12px; padding-right: 12px; max-width: 600px; }
-        h4 { text-align: center; font-weight: bold; margin-bottom: 25px; }
-        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; }
+        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .table { table-layout: fixed; width: 100%; min-width: 350px; background-color: #fff; margin-bottom: 0; }
         .table th, .table td { text-align: center; vertical-align: middle; padding: 4px 0px !important; font-size: 11px; height: 45px; border: 1px solid #dee2e6; }
         .table th:first-child, .table td:first-child { width: 45px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; }
-        
-        .time-slot, .time-slot-ng { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; }
-        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; }
-        .time-slot-ng { background-color: #f9f9f9; color: #ccc; }
-        
-        /* 休みの日の赤文字スタイル */
-        .time-slot-rest { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; background-color: #fff5f5; color: #dc3545; font-weight: bold; }
-
+        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-ng { background-color: #f9f9f9; color: #ccc; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-rest { background-color: #fff5f5; color: #dc3545; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; }
         .selected-slot { background-color: #28a745 !important; color: #fff !important; }
-        .selected-slot .time-slot { color: #fff !important; } 
-        
+        .selected-slot .time-slot { color: #fff !important; }
         .text-danger { color: #dc3545 !important; }
         .text-primary { color: #007bff !important; }
         .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 2px; }
         .month-label { font-size: 1.2rem; font-weight: bold; }
         label { font-weight: bold; font-size: 1rem; margin-top: 15px; }
         .required-badge { background-color: #dc3545; color: white; font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
-        .form-control { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1rem; }
         .btn-block { padding: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; }
-        
         #loadingMsg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; text-align:center; padding-top:200px; font-weight:bold; }
         .success-icon { font-size: 80px; color: #555; margin-bottom: 20px; font-weight: bold; }
         .success-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #333; }
@@ -42,62 +32,29 @@
     </style>
 </head>
 <body>
-
-<div id="loadingMsg">
-    <div class="spinner-border text-primary" role="status"></div>
-    <br>読み込み中...
-</div>
-
+<div id="loadingMsg"><div class="spinner-border text-primary"></div><br>読み込み中...</div>
 <div class="container" id="booking-form">
     <form id="mainForm">
-        
-        <div class="form-group">
-            <label>お名前<span class="required-badge">必須</span></label>
-            <input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required>
-        </div>
-
-        <div class="form-group">
-            <label>メニュー<span class="required-badge">必須</span></label>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：鈴木 花子" required></div>
+        <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
                 <option value="" data-slots="0">▼メニューを選択してください</option>
                 <option value="カット" data-slots="2">カット（約60分）</option>
-                <option value="カラー＋カット" data-slots="5">カラー＋カット（約150分）</option>
-                <option value="パーマ＋カット" data-slots="5">パーマ＋カット（約150分）</option>
-                <option value="トリートメント" data-slots="2">トリートメント（約60分）</option>
-                <option value="縮毛矯正＋カット" data-slots="6">縮毛矯正＋カット（約180分）</option>
-                <option value="まつ毛パーマ" data-slots="2">まつ毛パーマ（60分）</option>
-                <option value="まつげエクステ" data-slots="3">まつげエクステ（90分）</option>
+                <option value="カラー＋カット" data-slots="5">カラー＋カット</option>
+                <option value="パーマ＋カット" data-slots="5">パーマ＋カット</option>
+                <option value="トリートメント" data-slots="2">トリートメント</option>
+                <option value="縮毛矯正＋カット" data-slots="6">縮毛矯正＋カット</option>
+                <option value="まつ毛パーマ" data-slots="2">まつ毛パーマ</option>
+                <option value="まつげエクステ" data-slots="3">まつげエクステ</option>
             </select>
         </div>
-
-        <div style="margin-top: 30px;" id="calendarSection">
+        <div style="margin-top: 30px;">
             <label>予約日時を選択してください<span class="required-badge">必須</span></label>
-            
-            <div class="week-nav">
-                <button type="button" id="prevWeekBtn" class="btn btn-outline-secondary" onclick="movePrevWeek()">&lt; 前の週</button>
-                <span id="currentMonthDisplay" class="month-label"></span>
-                <button type="button" id="nextWeekBtn" class="btn btn-primary" onclick="moveNextWeek()">次の週 &gt;</button>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead><tr id="dateHeader"></tr></thead>
-                    <tbody id="timeBody"></tbody>
-                </table>
-            </div>
-            <div class="text-center text-muted mb-3" style="font-size:0.85rem;">
-                ※「〇」をタップして時間を選択してください
-            </div>
+            <div class="week-nav"><button type="button" class="btn btn-outline-secondary" onclick="moveWeek(-7)">&lt; 前の週</button><span id="currentMonthDisplay" class="month-label"></span><button type="button" class="btn btn-primary" onclick="moveWeek(7)">次の週 &gt;</button></div>
+            <div class="table-responsive"><table class="table table-bordered"><thead><tr id="dateHeader"></tr></thead><tbody id="timeBody"></tbody></table></div>
         </div>
-
-        <input type="hidden" id="selected_date" name="date">
-        <input type="hidden" id="selected_time" name="time">
-
-        <div class="form-group">
-            <label>お問い合わせ</label>
-            <textarea name="inquiry" class="form-control" rows="3" style="height: auto;" placeholder="ご要望などがあればご記入ください"></textarea>
-        </div>
-
+        <input type="hidden" id="selected_date" name="date"><input type="hidden" id="selected_time" name="time">
+        <div class="form-group"><label>お問い合わせ</label><textarea name="inquiry" class="form-control" rows="3" placeholder="ご要望など"></textarea></div>
         <button type="button" id="submitBtn" class="btn btn-success btn-block" onclick="submitData()">予約を確定する</button>
     </form>
 </div>
@@ -114,225 +71,123 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-    // ★★★ ここにGASのURL（/execで終わるやつ）を貼ってください ★★★
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7dtkuizL1LiGUbEB4yJLIsfiab9yDVD5Ysvu81MkDNj1dqpWQmGj-YRal1fdvjHy2/exec";
-    const MY_LIFF_ID = "1660734162-KM7yyz77";
-
+    const LIFF_ID = "1660734162-KM7yyz77";
     let bookedTimesSet = new Set();
     let currentBaseDate = new Date();
 
     window.onload = function() {
-        if(typeof liff !== 'undefined'){
-            liff.init({ liffId: MY_LIFF_ID }).then(() => {
-                if (!liff.isLoggedIn()) liff.login();
-            }).catch(err => console.log(err));
-        }
+        liff.init({ liffId: LIFF_ID }).then(() => { if (!liff.isLoggedIn()) liff.login(); });
         fetchBookedData();
     };
 
     function fetchBookedData() {
         document.getElementById('loadingMsg').style.display = 'block';
-        fetch(GAS_API_URL + '?p=json')
-            .then(res => res.json())
-            .then(data => {
-                bookedTimesSet.clear();
-                data.forEach(dt => {
-                    let parts = dt.split(' ');
-                    if(parts.length >= 2) {
-                        let dParts = parts[0].split('/');
-                        let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
-                        
-                        // 時間の「09:30」を「9:30」に直して保存
-                        let tParts = parts[1].split(':');
-                        if (tParts.length === 2) {
-                            let normalTime = parseInt(tParts[0], 10) + ":" + tParts[1];
-                            bookedTimesSet.add(normalDate + ' ' + normalTime);
-                        } else {
-                            bookedTimesSet.add(normalDate + ' ' + parts[1]);
-                        }
-                    }
-                });
-                document.getElementById('loadingMsg').style.display = 'none';
-                renderWeekCalendar();
-            })
-            .catch(err => {
-                console.error("通信エラー", err);
-                document.getElementById('loadingMsg').style.display = 'none';
+        fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
+            bookedTimesSet.clear();
+            data.forEach(dt => {
+                let p = dt.split(' ');
+                let dParts = p[0].split('/');
+                let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
+                if(p[1] === "休") bookedTimesSet.add(normalDate + " 休");
+                else {
+                    let tParts = p[1].split(':');
+                    bookedTimesSet.add(normalDate + ' ' + parseInt(tParts[0]) + ":" + tParts[1]);
+                }
             });
+            document.getElementById('loadingMsg').style.display = 'none';
+            renderWeekCalendar();
+        });
     }
 
     function renderWeekCalendar() {
-        const menuSelect = document.getElementById('menuInput');
-        const slots = parseInt(menuSelect.options[menuSelect.selectedIndex].getAttribute('data-slots') || 0);
-
-        if (slots === 0) {
-            document.getElementById('timeBody').innerHTML = '<tr><td colspan="8" class="text-center p-3">メニューを選択すると空き状況が表示されます</td></tr>';
-            return;
-        }
-
+        const slots = parseInt(document.getElementById('menuInput').selectedOptions[0].getAttribute('data-slots') || 0);
         const headerRow = document.getElementById('dateHeader');
         const timeBody = document.getElementById('timeBody');
         headerRow.innerHTML = '<th>時間</th>';
         timeBody.innerHTML = '';
+        if (slots === 0) return;
 
         let tempDate = new Date(currentBaseDate);
-        tempDate.setDate(tempDate.getDate() - tempDate.getDay()); 
-
-        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        tempDate.setDate(tempDate.getDate() - tempDate.getDay());
         let weekDates = [];
-
         for (let i = 0; i < 7; i++) {
-            let m = tempDate.getMonth() + 1;
-            let d = tempDate.getDate();
-            let w = tempDate.getDay();
-            
-            let thClass = '';
-            if (w === 0) thClass = 'text-danger';
-            if (w === 6) thClass = 'text-primary';
-
+            let m = tempDate.getMonth() + 1, d = tempDate.getDate(), w = tempDate.getDay();
             let dateKey = tempDate.getFullYear() + '/' + m + '/' + d;
-            
-            let isHoliday = false;
-            if (w === 1) isHoliday = true; 
-            if (w === 2 && d >= 15 && d <= 21) isHoliday = true;
-
-            weekDates.push({ dateKey: dateKey, isHoliday: isHoliday, dateObj: new Date(tempDate) });
-
-            let thHtml = `<th class="${thClass}">${d}<br><small>(${days[w]})</small></th>`;
-            headerRow.insertAdjacentHTML('beforeend', thHtml);
-
-            if (i === 0) {
-                document.getElementById('currentMonthDisplay').innerText = `${m}月`;
-            }
+            let isHoliday = (w === 1 || (w === 2 && d >= 15 && d <= 21));
+            weekDates.push({ dateKey, isHoliday, dateObj: new Date(tempDate) });
+            headerRow.insertAdjacentHTML('beforeend', `<th class="${w===0?'text-danger':w===6?'text-primary':''}">${d}<br><small>(${['日','月','火','水','木','金','土'][w]})</small></th>`);
+            if (i === 0) document.getElementById('currentMonthDisplay').innerText = m + '月';
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // ★30分刻みでループ (9:00, 9:30, 10:00... 18:30)
+        // ★修正点：18時まででループを止める処理を追加★
         for (let h = 9; h <= 18; h++) {
-            createTimeRow(h, 0, weekDates, slots, timeBody);
-            createTimeRow(h, 30, weekDates, slots, timeBody);
+            [0, 30].forEach(m => {
+                // 18:30になったら作らずに終了（18:00が最後）
+                if (h === 18 && m === 30) return;
+
+                let timeStr = h + ":" + (m === 0 ? "00" : "30");
+                let tr = `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
+                weekDates.forEach(info => {
+                    let target = new Date(info.dateObj); target.setHours(h, m);
+                    if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) tr += '<td><div class="time-slot-rest">休</div></td>';
+                    else if (target < new Date()) tr += '<td><div class="time-slot-ng">-</div></td>';
+                    else {
+                        let avail = true;
+                        for(let s=0; s<slots; s++){
+                            let ch = h, cm = m + (s*30);
+                            if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                            // 19:00を超える予約（閉店時間を過ぎる）は不可にする場合はここ
+                            if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || ch>=19) { avail=false; break; }
+                        }
+                        tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
+                    }
+                });
+                timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+            });
         }
     }
 
-    function createTimeRow(h, m, weekDates, slots, container) {
-        let timeStr = h + ":" + (m === 0 ? "00" : "30");
-        let tr = document.createElement('tr');
-        tr.innerHTML = `<td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
-
-        for (let i = 0; i < 7; i++) {
-            let info = weekDates[i];
-            let td = document.createElement('td');
-            
-            let targetDateTime = new Date(info.dateObj);
-            targetDateTime.setHours(h, m, 0, 0);
-            let now = new Date();
-
-            let isSheetHoliday = bookedTimesSet.has(info.dateKey + " 休");
-
-            if (info.isHoliday || isSheetHoliday) {
-                td.innerHTML = '<div class="time-slot-rest">休</div>';
-            } else if (targetDateTime < now) {
-                td.innerHTML = '<div class="time-slot-ng">-</div>';
-            } else {
-                if (isAvailable(info.dateKey, h, m, slots)) {
-                    td.innerHTML = '<div class="time-slot">〇</div>';
-                    td.dataset.date = info.dateKey;
-                    td.dataset.time = timeStr;
-                    td.onclick = function() { selectSlot(this); }; 
-                } else {
-                    td.innerHTML = '<div class="time-slot-ng">×</div>';
-                }
-            }
-            tr.appendChild(td);
-        }
-        container.appendChild(tr);
+    function selectSlot(el, date, time) {
+        document.querySelectorAll('.selected-slot').forEach(e => e.classList.remove('selected-slot'));
+        el.parentElement.classList.add('selected-slot');
+        document.getElementById('selected_date').value = date;
+        document.getElementById('selected_time').value = time;
     }
 
-    function isAvailable(dateKey, startH, startM, neededSlots) {
-        let currentH = startH;
-        let currentM = startM;
-        // ★コマ数の計算を30分単位で行う
-        for (let i = 0; i < neededSlots; i++) {
-            let timeStr = currentH + ":" + (currentM === 0 ? "00" : "30");
-            let checkKey = dateKey + " " + timeStr;
-            
-            if (bookedTimesSet.has(checkKey) || bookedTimesSet.has(dateKey + " 休")) return false;
-            
-            // 閉店は19:00まで (19:00以降にかかる予約はNG)
-            if (currentH >= 19) return false;
-
-            currentM += 30;
-            if (currentM >= 60) { currentM = 0; currentH++; }
-        }
-        return true;
-    }
-
-    function selectSlot(td) {
-        let selected = document.querySelector('.selected-slot');
-        if (selected) {
-            selected.querySelector('.time-slot').style.color = '#28a745';
-            selected.classList.remove('selected-slot');
-        }
-        
-        td.classList.add('selected-slot');
-        td.querySelector('.time-slot').style.color = 'white';
-        document.getElementById('selected_date').value = td.dataset.date;
-        document.getElementById('selected_time').value = td.dataset.time;
-    }
-
-    function movePrevWeek() {
-        currentBaseDate.setDate(currentBaseDate.getDate() - 7);
-        renderWeekCalendar();
-    }
-    function moveNextWeek() {
-        currentBaseDate.setDate(currentBaseDate.getDate() + 7);
-        renderWeekCalendar();
-    }
-
+    function moveWeek(n) { currentBaseDate.setDate(currentBaseDate.getDate() + n); renderWeekCalendar(); }
+    
     function submitData() {
-        var form = document.getElementById('mainForm');
-        var menuSelect = document.getElementById('menuInput');
-        var slots = menuSelect.options[menuSelect.selectedIndex].getAttribute('data-slots');
+        let f = document.getElementById('mainForm');
+        let data = { date: f.date.value, time: f.time.value, name: f.name.value, menu: f.menu.value, inquiry: f.inquiry.value, slots: f.menu.selectedOptions[0].getAttribute('data-slots') };
+        if(!data.date || !data.name) return alert("入力不足です");
         
-        var data = {
-            date: document.getElementById('selected_date').value,
-            time: document.getElementById('selected_time').value,
-            name: form.name.value,
-            menu: form.menu.value,
-            inquiry: form.inquiry.value,
-            slots: slots
-        };
+        let btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.textContent = "送信中...";
 
-        if(!data.date || !data.time || !data.name) { alert("日時とお名前を入力してください"); return; }
-
-        var btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.textContent = "送信中...";
-
-        fetch(GAS_API_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.text())
-        .then(msg => {
+        fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) })
+        .then(() => { 
             document.getElementById('booking-form').style.display = 'none';
             document.getElementById('success-area').style.display = 'block';
             window.scrollTo(0,0);
+            
+            // LINEメッセージ送信
             if (liff && liff.isLoggedIn()) {
-                var msgText = "Web予約完了\n" + data.date + " " + data.time + "\n" + data.menu;
-                liff.sendMessages([{ 'type': 'text', 'text': msgText }]).catch(e => console.log(e));
+                let msg = "＊＊ご予約内容＊＊\n" +
+                          "お名前：\n" + data.name + "\n" +
+                          "希望日：\n" + data.date + "\n" +
+                          "時間：\n" + data.time + "\n" +
+                          "メニュー：\n" + data.menu + "\n" +
+                          "問い合わせ内容：\n" + (data.inquiry || "なし");
+                
+                liff.sendMessages([{ 'type': 'text', 'text': msg }]).catch(e => console.log(e));
             }
         })
-        .catch(err => {
-            alert("送信エラー: " + err);
-            btn.disabled = false;
-            btn.textContent = "予約を確定する";
-        });
+        .catch(err => { alert("エラー: " + err); btn.disabled = false; btn.textContent = "予約を確定する"; });
     }
 
     function closeLiff() { if (liff) liff.closeWindow(); }
 </script>
-
 </body>
 </html>
