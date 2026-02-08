@@ -8,123 +8,140 @@
     <style>
         body { background-color: #f8f9fa; padding-top: 20px; padding-bottom: 50px; color: #333; }
         .container { padding-left: 12px; padding-right: 12px; max-width: 600px; }
-        h4 { text-align: center; font-weight: bold; margin-bottom: 25px; }
-        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; }
-        .table { table-layout: fixed; width: 100%; background-color: #fff; margin-bottom: 0; }
+        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table { table-layout: fixed; width: 100%; min-width: 350px; background-color: #fff; margin-bottom: 0; }
         .table th, .table td { text-align: center; vertical-align: middle; padding: 4px 0px !important; font-size: 11px; height: 45px; border: 1px solid #dee2e6; }
         .table th:first-child, .table td:first-child { width: 45px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; }
-        .time-slot, .time-slot-ng { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; }
-        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; }
-        .time-slot-ng { background-color: #f9f9f9; color: #ccc; }
+        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-ng { background-color: #f9f9f9; color: #ccc; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-rest { background-color: #fff5f5; color: #dc3545; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; }
         .selected-slot { background-color: #28a745 !important; color: #fff !important; }
+        .selected-slot .time-slot { color: #fff !important; }
         .text-danger { color: #dc3545 !important; }
         .text-primary { color: #007bff !important; }
         .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 2px; }
         .month-label { font-size: 1.2rem; font-weight: bold; }
         label { font-weight: bold; font-size: 1rem; margin-top: 15px; }
         .required-badge { background-color: #dc3545; color: white; font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
-        .form-control { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1rem; }
         .btn-block { padding: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; }
         #loadingMsg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; text-align:center; padding-top:200px; font-weight:bold; }
-        .success-icon { font-size: 80px; color: #555; margin-bottom: 20px; font-weight: bold; }
-        .success-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #333; }
-        .success-msg { font-size: 1rem; line-height: 1.8; margin-bottom: 40px; }
-        .btn-gray { background-color: #6c757d; color: white; padding: 10px 30px; border-radius: 5px; font-size: 1rem; }
     </style>
 </head>
 <body>
-
-<div id="loadingMsg">
-    <div class="spinner-border text-primary" role="status"></div>
-    <br>読み込み中...
-</div>
-
+<div id="loadingMsg"><div class="spinner-border text-primary"></div><br>読み込み中...</div>
 <div class="container" id="booking-form">
-    
-    <div class="form-group">
-        <label>お名前<span class="required-badge">必須</span></label>
-        <input type="text" name="namelabel" class="form-control" placeholder="例：BEAUTY SALON ODA" required>
-    </div>
-
-    <div style="margin-top: 30px;">
-        <label>予約日時を選択してください<span class="required-badge">必須</span></label>
-        
-        <div class="week-nav">
-            <button id="prevWeek" class="btn btn-outline-secondary">&lt; 前の週</button>
-            <span id="currentMonthDisplay" class="month-label">1月</span>
-            <button id="nextWeek" class="btn btn-primary">次の週 &gt;</button>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead><tr id="dateHeader"></tr></thead>
-                <tbody id="timeBody"></tbody>
-            </table>
-        </div>
-        <div class="text-center text-muted mb-3" style="font-size:0.85rem;">
-            ※「〇」をタップして時間を選択してください
-        </div>
-    </div>
-
-    <form method="post" target="hidden_iframe">
-        <input type="hidden" id="selected_date" name="date">
-        <input type="hidden" id="selected_time" name="minute">
-
-        <div class="form-group">
-            <label>メニュー<span class="required-badge">必須</span></label>
-            <select name="names" class="form-control" required>
-                <option value="" disabled selected>選択してください</option>
-                <option value="カット">カット</option>
-                <option value="パーマ＋カット">パーマ＋カット</option>
-                <option value="カラー＋カット">カラー＋カット</option>
-                <option value="トリートメント">トリートメント</option>
-                <option value="縮毛矯正＋カット">縮毛矯正＋カット</option>
-                <option value="まつ毛カール">まつ毛カール</option>
-                <option value="まつ毛エクステ">まつ毛エクステ</option>
-                <option value="トリートメントストレートパーマ">トリートメントストレートパーマ</option>
-                <option value="着付け">着付け</option>
+    <form id="mainForm">
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：鈴木 花子" required></div>
+        <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
+            <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
+                <option value="" data-slots="0">選択してください</option>
+                <option value="カット" data-slots="2">カット 約60分</option>
+                <option value="カラー＋カット" data-slots="5">カラー＋カット 約150分</option>
+                <option value="パーマ＋カット" data-slots="5">パーマ＋カット 約150分</option>
+                <option value="トリートメント" data-slots="2">トリートメント 約40分</option>
+                <option value="縮毛矯正 ＋カット" data-slots="6">縮毛矯正 ＋カット 約180分</option>
+                <option value="まつ毛パーマ" data-slots="2">まつ毛パーマ 60分</option>
+                <option value="まつげエクステ" data-slots="3">まつげエクステ 90分</option>
             </select>
         </div>
-        
-        <div class="form-group">
-            <label>お問い合わせ</label>
-            <textarea name="inquiries" class="form-control" rows="3" style="height: auto;" placeholder="ご要望などがあればご記入ください"></textarea>
+        <div style="margin-top: 30px;">
+            <label>予約日時を選択してください<span class="required-badge">必須</span></label>
+            <div class="week-nav"><button type="button" class="btn btn-outline-secondary" onclick="moveWeek(-7)">&lt; 前の週</button><span id="currentMonthDisplay" class="month-label"></span><button type="button" class="btn btn-primary" onclick="moveWeek(7)">次の週 &gt;</button></div>
+            <div class="table-responsive"><table class="table table-bordered"><thead><tr id="dateHeader"></tr></thead><tbody id="timeBody"></tbody></table></div>
         </div>
-
-        <div id="web-contact-area" style="display:none;">
-            <div class="form-group">
-                <label>メールアドレス<span class="required-badge">必須</span></label>
-                <input type="email" name="user_email" class="form-control" placeholder="example@gmail.com">
-            </div>
-            <div class="form-group">
-                <label>電話番号<span class="required-badge">必須</span></label>
-                <input type="tel" name="user_phone" class="form-control" placeholder="09012345678">
-            </div>
-        </div>
-
-        <div id="line-urgent-msg" style="display:none; font-size:0.85rem; color:#666; margin-bottom:15px; margin-top: 10px;">
-            ※ご連絡先はLINEアカウント情報を参照します
-        </div>
-
-        <input type="submit" class="btn btn-success btn-block" value="予約を確定する">
+        <input type="hidden" id="selected_date" name="date"><input type="hidden" id="selected_time" name="time">
+        <div class="form-group"><label>お問い合わせ</label><textarea name="inquiry" class="form-control" rows="3" placeholder="ご要望など"></textarea></div>
+        <button type="button" id="submitBtn" class="btn btn-success btn-block" onclick="submitData()">予約を確定する</button>
     </form>
 </div>
-
-<div class="container" id="success-area" style="display:none; text-align:center; padding-top:80px;">
-    <div class="success-icon">✔</div>
-    <div class="success-title">予約を受け付けました</div>
-    <div class="success-msg">
-        ご予約ありがとうございます。<br>
-        確認後、ご連絡いたします。
-    </div>
-    <button onclick="liff.closeWindow();" class="btn btn-gray">閉じる / 戻る</button>
-</div>
-
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="index.js"></script>
+<script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7dtkuizL1LiGUbEB4yJLIsfiab9yDVD5Ysvu81MkDNj1dqpWQmGj-YRal1fdvjHy2/exec";
+    let bookedTimesSet = new Set();
+    let currentBaseDate = new Date();
 
+    window.onload = function() {
+        liff.init({ liffId: "1657883881-JG16djMv" }).then(() => { if (!liff.isLoggedIn()) liff.login(); });
+        fetchBookedData();
+    };
+
+    function fetchBookedData() {
+        document.getElementById('loadingMsg').style.display = 'block';
+        fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
+            bookedTimesSet.clear();
+            data.forEach(dt => {
+                let p = dt.split(' ');
+                let dParts = p[0].split('/');
+                let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
+                if(p[1] === "休") bookedTimesSet.add(normalDate + " 休");
+                else {
+                    let tParts = p[1].split(':');
+                    bookedTimesSet.add(normalDate + ' ' + parseInt(tParts[0]) + ":" + tParts[1]);
+                }
+            });
+            document.getElementById('loadingMsg').style.display = 'none';
+            renderWeekCalendar();
+        });
+    }
+
+    function renderWeekCalendar() {
+        const slots = parseInt(document.getElementById('menuInput').selectedOptions[0].getAttribute('data-slots') || 0);
+        const headerRow = document.getElementById('dateHeader');
+        const timeBody = document.getElementById('timeBody');
+        headerRow.innerHTML = '<th>時間</th>';
+        timeBody.innerHTML = '';
+        if (slots === 0) return;
+
+        let tempDate = new Date(currentBaseDate);
+        tempDate.setDate(tempDate.getDate() - tempDate.getDay());
+        let weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            let m = tempDate.getMonth() + 1, d = tempDate.getDate(), w = tempDate.getDay();
+            let dateKey = tempDate.getFullYear() + '/' + m + '/' + d;
+            let isHoliday = (w === 1 || (w === 2 && d >= 15 && d <= 21));
+            weekDates.push({ dateKey, isHoliday, dateObj: new Date(tempDate) });
+            headerRow.insertAdjacentHTML('beforeend', `<th class="${w===0?'text-danger':w===6?'text-primary':''}">${d}<br><small>(${['日','月','火','水','木','金','土'][w]})</small></th>`);
+            if (i === 0) document.getElementById('currentMonthDisplay').innerText = m + '月';
+            tempDate.setDate(tempDate.getDate() + 1);
+        }
+
+        for (let h = 9; h <= 18; h++) {
+            [0, 30].forEach(m => {
+                let timeStr = h + ":" + (m === 0 ? "00" : "30");
+                let tr = `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
+                weekDates.forEach(info => {
+                    let target = new Date(info.dateObj); target.setHours(h, m);
+                    if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) tr += '<td><div class="time-slot-rest">休</div></td>';
+                    else if (target < new Date()) tr += '<td><div class="time-slot-ng">-</div></td>';
+                    else {
+                        let avail = true;
+                        for(let s=0; s<slots; s++){
+                            let ch = h, cm = m + (s*30);
+                            if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                            if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || ch>=19) { avail=false; break; }
+                        }
+                        tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
+                    }
+                });
+                timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+            });
+        }
+    }
+
+    function selectSlot(el, date, time) {
+        document.querySelectorAll('.selected-slot').forEach(e => e.classList.remove('selected-slot'));
+        el.parentElement.classList.add('selected-slot');
+        document.getElementById('selected_date').value = date;
+        document.getElementById('selected_time').value = time;
+    }
+
+    function moveWeek(n) { currentBaseDate.setDate(currentBaseDate.getDate() + n); renderWeekCalendar(); }
+    function submitData() {
+        let f = document.getElementById('mainForm');
+        let data = { date: f.date.value, time: f.time.value, name: f.name.value, menu: f.menu.value, inquiry: f.inquiry.value, slots: f.menu.selectedOptions[0].getAttribute('data-slots') };
+        if(!data.date || !data.name) return alert("入力不足です");
+        fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) }).then(() => { alert("予約完了"); liff.closeWindow(); });
+    }
+</script>
 </body>
 </html>
