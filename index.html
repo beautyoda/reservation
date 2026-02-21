@@ -7,18 +7,30 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; padding-top: 20px; padding-bottom: 50px; color: #333; }
-        .container { padding-left: 12px; padding-right: 12px; max-width: 600px; }
-        .table-responsive { border: none; margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .table { table-layout: fixed; width: 100%; min-width: 350px; background-color: #fff; margin-bottom: 0; }
-        .table th, .table td { text-align: center; vertical-align: middle; padding: 4px 0px !important; font-size: 11px; height: 45px; border: 1px solid #dee2e6; }
-        .table th:first-child, .table td:first-child { width: 45px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; }
-        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
-        .time-slot-ng { background-color: #f9f9f9; color: #ccc; display: flex; align-items: center; justify-content: center; height: 100%; }
-        .time-slot-rest { background-color: #fff5f5; color: #dc3545; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 100%; }
+        
+        /* ★修正1：左右に「気持ちのいい余白（15px）」をしっかり復活！ */
+        .container { padding-left: 15px; padding-right: 15px; max-width: 600px; }
+        
+        /* ★修正2：スクロールさせない設定はそのまま維持 */
+        .table-responsive { border: none; margin-bottom: 1rem; overflow: hidden; }
+        .table { table-layout: fixed; width: 100%; background-color: #fff; margin-bottom: 0; }
+        
+        /* ★修正3：余白を作った分、カレンダーの中身が窮屈にならないようフォントサイズを微調整 */
+        .table th, .table td { text-align: center; vertical-align: middle; padding: 2px 0px !important; font-size: 10px; height: 45px; border: 1px solid #dee2e6; }
+        
+        /* 一番左の「時間」の列幅を最適化（10:30などが綺麗に入る幅） */
+        .table th:first-child, .table td:first-child { width: 42px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; letter-spacing: -0.5px; }
+        
+        /* 〇や×のマークのサイズを少しだけ調整してバランス良く */
+        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-ng { background-color: #f9f9f9; color: #ccc; font-size: 15px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-rest { background-color: #fff5f5; color: #dc3545; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        
         .selected-slot { background-color: #28a745 !important; color: #fff !important; }
         .selected-slot .time-slot { color: #fff !important; }
         .text-danger { color: #dc3545 !important; }
         .text-primary { color: #007bff !important; }
+        
         .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 2px; }
         .month-label { font-size: 1.2rem; font-weight: bold; }
         label { font-weight: bold; font-size: 1rem; margin-top: 15px; }
@@ -120,7 +132,6 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        // 18時まででループを止める
         for (let h = 9; h <= 18; h++) {
             [0, 30].forEach(m => {
                 if (h === 18 && m === 30) return;
@@ -169,7 +180,6 @@
             document.getElementById('success-area').style.display = 'block';
             window.scrollTo(0,0);
             
-            // LINEメッセージ送信
             if (liff && liff.isLoggedIn()) {
                 let msg = "＊＊ご予約内容＊＊\n" +
                           "お名前：\n" + data.name + "\n" +
