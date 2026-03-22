@@ -79,9 +79,21 @@
     const LIFF_ID = "1660734162-KM7yyz77";
     let bookedTimesSet = new Set();
     let currentBaseDate = new Date();
+    
+    // ★追加1：LINE IDを入れておく変数を準備
+    let lineUserId = ""; 
 
     window.onload = function() {
-        liff.init({ liffId: LIFF_ID }).then(() => { if (!liff.isLoggedIn()) liff.login(); });
+        liff.init({ liffId: LIFF_ID }).then(() => { 
+            if (!liff.isLoggedIn()) {
+                liff.login(); 
+            } else {
+                // ★追加2：ログイン済みならプロフィールを取得してIDを変数に入れる
+                liff.getProfile().then(profile => {
+                    lineUserId = profile.userId;
+                }).catch(err => console.error("ID取得エラー", err));
+            }
+        });
         fetchBookedData();
     };
 
@@ -164,7 +176,18 @@
     
     function submitData() {
         let f = document.getElementById('mainForm');
-        let data = { date: f.date.value, time: f.time.value, name: f.name.value, menu: f.menu.value, inquiry: f.inquiry.value, slots: f.menu.selectedOptions[0].getAttribute('data-slots') };
+        
+        // ★追加3：送信するデータの中に「userId: lineUserId」を混ぜる
+        let data = { 
+            date: f.date.value, 
+            time: f.time.value, 
+            name: f.name.value, 
+            menu: f.menu.value, 
+            inquiry: f.inquiry.value, 
+            slots: f.menu.selectedOptions[0].getAttribute('data-slots'),
+            userId: lineUserId 
+        };
+        
         if(!data.date || !data.name) return alert("入力不足です");
         
         let btn = document.getElementById('submitBtn');
@@ -172,7 +195,6 @@
 
         fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) })
         .then(res => {
-            // URLが間違っていてHTMLが返ってきた場合のブロック機能
             const contentType = res.headers.get("content-type");
             if (contentType && contentType.includes("text/html")) {
                 throw new Error("システムのURLが古いか、連携が切れています。");
