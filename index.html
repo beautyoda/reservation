@@ -71,16 +71,12 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-    // =========================================================================
-    // ★ここを、今の店主用画面と同じURLに貼り替えてください！！
-    // =========================================================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbySroVlL37F4F1Q_a7i7sKLPbYPhP3NL5aOhPoM1e1TMdIfNUONUPMxlVhwyFDDasY/exec"; 
     
     const LIFF_ID = "1660734162-KM7yyz77";
     let bookedTimesSet = new Set();
     let currentBaseDate = new Date();
     
-    // ★追加1：LINE IDを入れておく変数を準備
     let lineUserId = ""; 
 
     window.onload = function() {
@@ -88,7 +84,6 @@
             if (!liff.isLoggedIn()) {
                 liff.login(); 
             } else {
-                // ★追加2：ログイン済みならプロフィールを取得してIDを変数に入れる
                 liff.getProfile().then(profile => {
                     lineUserId = profile.userId;
                 }).catch(err => console.error("ID取得エラー", err));
@@ -177,7 +172,7 @@
     function submitData() {
         let f = document.getElementById('mainForm');
         
-        // ★追加3：送信するデータの中に「userId: lineUserId」を混ぜる
+        // ★修正点：データオブジェクトに 「via: "LINE予約"」 を明示的に追加しました
         let data = { 
             date: f.date.value, 
             time: f.time.value, 
@@ -185,7 +180,8 @@
             menu: f.menu.value, 
             inquiry: f.inquiry.value, 
             slots: f.menu.selectedOptions[0].getAttribute('data-slots'),
-            userId: lineUserId 
+            userId: lineUserId,
+            via: "LINE予約" 
         };
         
         if(!data.date || !data.name) return alert("入力不足です");
