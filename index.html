@@ -115,7 +115,10 @@
     }
 
     function renderWeekCalendar() {
-        const slots = parseInt(document.getElementById('menuInput').selectedOptions[0].getAttribute('data-slots') || 0);
+        // ★変更点：メニューの選択状態（data-slots）を確実に取得できるよう安全な記述法に修正
+        const menuSelect = document.getElementById('menuInput');
+        const slots = parseInt(menuSelect.options[menuSelect.selectedIndex].getAttribute('data-slots') || 0);
+        
         const headerRow = document.getElementById('dateHeader');
         const timeBody = document.getElementById('timeBody');
         headerRow.innerHTML = '<th>時間</th>';
@@ -172,7 +175,7 @@
     function submitData() {
         let f = document.getElementById('mainForm');
         
-        // ★修正点：データオブジェクトに 「via: "LINE予約"」 を明示的に追加しました
+        // ★変更点：データオブジェクトに「via: "LINE予約"」を明確に設定
         let data = { 
             date: f.date.value, 
             time: f.time.value, 
