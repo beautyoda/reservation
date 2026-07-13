@@ -103,7 +103,10 @@
                 if(p[1] === "休") bookedTimesSet.add(normalDate + " 休");
                 else {
                     let tParts = p[1].split(':');
-                    bookedTimesSet.add(normalDate + ' ' + parseInt(tParts[0]) + ":" + tParts[1]);
+                    // 分の数値を崩さないよう文字列として結合
+                    let paddedHour = parseInt(tParts[0]);
+                    let paddedMin = tParts[1].trim();
+                    bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + paddedMin);
                 }
             });
             document.getElementById('loadingMsg').style.display = 'none';
@@ -163,7 +166,8 @@
                             let ch = h, cm = m + (s*30);
                             if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
                             
-                            if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 30))) { 
+                            let checkTimeStr = ch + ":" + (cm===0?"00":"30");
+                            if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr) || (ch > 18 || (ch === 18 && cm > 30))) { 
                                 avail = false; 
                                 break; 
                             }
