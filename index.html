@@ -137,22 +137,25 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
+        const now = new Date();
+
         for (let h = 9; h <= 18; h++) {
             [0, 30].forEach(m => {
                 if (h === 18 && m > 30) return;
 
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
                 let isVisible = !(h === 18 && (m === 0 || m === 30));
+                let displayStyle = isVisible ? '' : ' style="display:none;"';
 
-                let tr = isVisible ? `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>` : '';
+                let tr = `<tr${displayStyle}><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
                 
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
                     
                     if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) {
-                        if (isVisible) tr += '<td><div class="time-slot-rest">休</div></td>';
-                    } else if (target < new Date()) {
-                        if (isVisible) tr += '<td><div class="time-slot-ng">-</div></td>';
+                        tr += '<td><div class="time-slot-rest">休</div></td>';
+                    } else if (target < now) {
+                        tr += '<td><div class="time-slot-ng">-</div></td>';
                     } else {
                         let avail = true;
                         
@@ -172,15 +175,11 @@
                             }
                         }
                         
-                        if (isVisible) {
-                            tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
-                        }
+                        tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
                     }
                 });
                 
-                if (isVisible) {
-                    timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
-                }
+                timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
             });
         }
     }
@@ -217,7 +216,7 @@
         .then(res => {
             const contentType = res.headers.get("content-type");
             if (contentType && contentType.includes("text/html")) {
-                throw new Error("系统的URLが古いか、連携が切れています。");
+                throw new Error("システムのURLが古いか、連携が切れています。");
             }
             return res.text();
         })
