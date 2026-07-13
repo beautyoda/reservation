@@ -158,20 +158,14 @@
                         tr += '<td><div class="time-slot-ng">-</div></td>';
                     } else {
                         let avail = true;
-                        
-                        if (h === 17 && m === 30 && slots > 2) {
-                            avail = false;
-                        }
 
-                        if (avail) {
-                            for(let s=0; s<slots; s++){
-                                let ch = h, cm = m + (s*30);
-                                if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
-                                
-                                if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 30))) { 
-                                    avail = false; 
-                                    break; 
-                                }
+                        for(let s=0; s<slots; s++){
+                            let ch = h, cm = m + (s*30);
+                            if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                            
+                            if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 30))) { 
+                                avail = false; 
+                                break; 
                             }
                         }
                         
