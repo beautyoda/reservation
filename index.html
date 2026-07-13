@@ -137,41 +137,53 @@
             tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        for (let h = 9; h <= 17; h++) {
+        // 表示自体は17:30までですが、裏側の枠計算が正常に行えるよう内部ループの上限を18まで拡張します
+        for (let h = 9; h <= 18; h++) {
             [0, 30].forEach(m => {
+                // 画面に表示する行は17:30まで。18:00以降の行はカレンダーへ追加せず裏の判定用データとしてのみ処理
+                if (h === 18 && m > 0) return;
+
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
-                let tr = `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
+                let isDisplayRow = !(h === 18 && m === 0);
+
+                let tr = isDisplayRow ? `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>` : '';
+                
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
-                    if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) tr += '<td><div class="time-slot-rest">休</div></td>';
-                    else if (target < new Date()) tr += '<td><div class="time-slot-ng">-</div></td>';
-                    else {
-                        let avail = true;
-                        
-                        // 【ロジック変更】17:30の枠に対する特定のメニュー枠数制限
-                        if (h === 17 && m === 30) {
-                            // 選択メニューが「カット」「トリートメント」「まつ毛パーマ」（2枠・60分）以外の時は、一律で受付不可（×）とする
-                            if (slots > 2) {
+                    
+                    if (isDisplayRow) {
+                        if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) {
+                            tr += '<td><div class="time-slot-rest">休</div></td>';
+                        } else if (target < new Date()) {
+                            tr += '<td><div class="time-slot-ng">-</div></td>';
+                        } else {
+                            let avail = true;
+                            
+                            // 17:30時点で選択可能なメニューを「カット」「トリートメント」「まつ毛パーマ」（2枠・60分）に限定
+                            if (h === 17 && m === 30 && slots > 2) {
                                 avail = false;
                             }
-                        }
 
-                        if (avail) {
-                            for(let s=0; s<slots; s++){
-                                let ch = h, cm = m + (s*30);
-                                if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
-                                
-                                // 18:00の枠（17:30からの2枠目）までは許容。18:30以降（ch>18 または 18:30以降の枠）に達した、あるいは既存予約がある場合は不可
-                                if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 0))) { 
-                                    avail = false; 
-                                    break; 
+                            if (avail) {
+                                for(let s=0; s<slots; s++){
+                                    let ch = h, cm = m + (s*30);
+                                    if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                                    
+                                    // 18:00（17:30からの2枠目）の終了時点（18:30）に到達、または既存の予約（ブロック含む）がある場合は不可
+                                    if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 0))) { 
+                                        avail = false; 
+                                        break; 
+                                    }
                                 }
                             }
+                            tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
                         }
-                        tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
                     }
                 });
-                timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+                
+                if (isDisplayRow) {
+                    timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+                }
             });
         }
     }
