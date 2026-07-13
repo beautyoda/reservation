@@ -1,53 +1,250 @@
-// 営業終了の18:30まで内部計算用にループを回す
-for (let h = 9; h <= 18; h++) {
-    [0, 30].forEach(m => {
-        if (h === 18 && m > 30) return; // 18:30までで終了
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>予約フォーム</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 20px; padding-bottom: 50px; color: #333; }
+        .container { padding-left: 15px; padding-right: 15px; max-width: 600px; }
+        .table-responsive { border: none; margin-bottom: 1rem; overflow: hidden; }
+        .table { table-layout: fixed; width: 100%; background-color: #fff; margin-bottom: 0; }
+        .table th, .table td { text-align: center; vertical-align: middle; padding: 2px 0px !important; font-size: 10px; height: 45px; border: 1px solid #dee2e6; }
+        .table th:first-child, .table td:first-child { width: 42px; background-color: #f1f1f1; font-weight: bold; font-size: 10px; letter-spacing: -0.5px; }
+        .time-slot { cursor: pointer; color: #28a745; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-ng { background-color: #f9f9f9; color: #ccc; font-size: 15px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .time-slot-rest { background-color: #fff5f5; color: #dc3545; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .selected-slot { background-color: #28a745 !important; color: #fff !important; }
+        .selected-slot .time-slot { color: #fff !important; }
+        .text-danger { color: #dc3545 !important; }
+        .text-primary { color: #007bff !important; }
+        .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 2px; }
+        .month-label { font-size: 1.2rem; font-weight: bold; }
+        label { font-weight: bold; font-size: 1rem; margin-top: 15px; }
+        .required-badge { background-color: #dc3545; color: white; font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+        .btn-block { padding: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; }
+        #loadingMsg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; text-align:center; padding-top:200px; font-weight:bold; }
+        .success-icon { font-size: 80px; color: #555; margin-bottom: 20px; font-weight: bold; }
+        .success-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .success-msg { font-size: 1rem; line-height: 1.8; margin-bottom: 40px; }
+        .btn-gray { background-color: #6c757d; color: white; padding: 10px 30px; border-radius: 5px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+<div id="loadingMsg"><div class="spinner-border text-primary"></div><br>読み込み中...</div>
+<div class="container" id="booking-form">
+    <form id="mainForm">
 
-        let timeStr = h + ":" + (m === 0 ? "00" : "30");
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required></div>
         
-        // 18:00と18:30の行は画面に表示しない
-        let isVisible = !(h === 18 && (m === 0 || m === 30));
+        <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
+            <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
+                <option value="" data-slots="0">▼メニューを選択してください</option>
+                <option value="カット" data-slots="2">カット</option>
+                <option value="カラー＋カット" data-slots="3">カラー＋カット</option>
+                <option value="パーマ＋カット" data-slots="3">パーマ＋カット</option>
+                <option value="トリートメント" data-slots="2">トリートメント</option>
+                <option value="縮毛矯正＋カット" data-slots="3">縮毛矯正＋カット</option>
+                <option value="まつ毛パーマ" data-slots="2">まつ毛パーマ</option>
+                <option value="まつげエクステ" data-slots="4">まつげエクステ</option>
+            </select>
+        </div>
+        <div style="margin-top: 30px;">
+            <label>予約日時を選択してください<span class="required-badge">必須</span></label>
+            <div class="week-nav"><button type="button" class="btn btn-outline-secondary" onclick="moveWeek(-7)">&lt; 前の週</button><span id="currentMonthDisplay" class="month-label"></span><button type="button" class="btn btn-primary" onclick="moveWeek(7)">次の週 &gt;</button></div>
+            <div class="table-responsive"><table class="table table-bordered"><thead><tr id="dateHeader"></tr></thead><tbody id="timeBody"></tbody></table></div>
+        </div>
+        <input type="hidden" id="selected_date" name="date"><input type="hidden" id="selected_time" name="time">
+        <div class="form-group"><label>お問い合わせ</label><textarea name="inquiry" class="form-control" rows="3" placeholder="ご要望など"></textarea></div>
+        <button type="button" id="submitBtn" class="btn btn-success btn-block" onclick="submitData()">予約を確定する</button>
+    </form>
+</div>
 
-        // 画面に表示する行だけtrタグを開始する
-        let tr = isVisible ? `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>` : '';
-        
-        weekDates.forEach(info => {
-            let target = new Date(info.dateObj); target.setHours(h, m);
-            
-            if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) {
-                if (isVisible) tr += '<td><div class="time-slot-rest">休</div></td>';
-            } else if (target < new Date()) {
-                if (isVisible) tr += '<td><div class="time-slot-ng">-</div></td>';
+<div class="container" id="success-area" style="display:none; text-align:center; padding-top:80px;">
+    <div class="success-icon">✔</div>
+    <div class="success-title">予約完了</div>
+    <div class="success-msg">
+    </div>
+    <button onclick="closeLiff()" class="btn btn-gray">閉じる</button>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbySroVlL37F4F1Q_a7i7sKLPbYPhP3NL5aOhPoM1e1TMdIfNUONUPMxlVhwyFDDasY/exec"; 
+    
+    const LIFF_ID = "1660734162-KM7yyz77";
+    let bookedTimesSet = new Set();
+    let currentBaseDate = new Date();
+    
+    let lineUserId = ""; 
+
+    window.onload = function() {
+        liff.init({ liffId: LIFF_ID }).then(() => { 
+            if (!liff.isLoggedIn()) {
+                liff.login(); 
             } else {
-                let avail = true;
-                
-                // 17:30の枠では、必要な枠数が2枠（60分）を超えるロングメニューを自動的に除外
-                if (h === 17 && m === 30 && slots > 2) {
-                    avail = false;
-                }
-
-                if (avail) {
-                    for(let s=0; s<slots; s++){
-                        let ch = h, cm = m + (s*30);
-                        if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
-                        
-                        // 18:30を超える、または既存予約がある場合はNG
-                        if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 30))) { 
-                            avail = false; 
-                            break; 
-                        }
-                    }
-                }
-                
-                if (isVisible) {
-                    tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
-                }
+                liff.getProfile().then(profile => {
+                    lineUserId = profile.userId;
+                }).catch(err => console.error("ID取得エラー", err));
             }
         });
+        fetchBookedData();
+    };
+
+    function fetchBookedData() {
+        document.getElementById('loadingMsg').style.display = 'block';
+        fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
+            bookedTimesSet.clear();
+            data.forEach(dt => {
+                let p = dt.split(' ');
+                let dParts = p[0].split('/');
+                let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
+                if(p[1] === "休") bookedTimesSet.add(normalDate + " 休");
+                else {
+                    let tParts = p[1].split(':');
+                    bookedTimesSet.add(normalDate + ' ' + parseInt(tParts[0]) + ":" + tParts[1]);
+                }
+            });
+            document.getElementById('loadingMsg').style.display = 'none';
+            renderWeekCalendar();
+        }).catch(err => {
+            alert("システムの読み込みに失敗しました。URLが間違っている可能性があります。");
+            document.getElementById('loadingMsg').style.display = 'none';
+        });
+    }
+
+    function renderWeekCalendar() {
+        const menuSelect = document.getElementById('menuInput');
+        const slots = parseInt(menuSelect.options[menuSelect.selectedIndex].getAttribute('data-slots') || 0);
         
-        // 画面に表示する行だけテーブルに追加する
-        if (isVisible) {
-            timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+        const headerRow = document.getElementById('dateHeader');
+        const timeBody = document.getElementById('timeBody');
+        headerRow.innerHTML = '<th>時間</th>';
+        timeBody.innerHTML = '';
+        if (slots === 0) return;
+
+        let tempDate = new Date(currentBaseDate);
+        tempDate.setDate(tempDate.getDate() - tempDate.getDay());
+        let weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            let m = tempDate.getMonth() + 1, d = tempDate.getDate(), w = tempDate.getDay();
+            let dateKey = tempDate.getFullYear() + '/' + m + '/' + d;
+            let isHoliday = (w === 1 || (w === 2 && d >= 15 && d <= 21));
+            weekDates.push({ dateKey, isHoliday, dateObj: new Date(tempDate) });
+            headerRow.insertAdjacentHTML('beforeend', `<th class="${w===0?'text-danger':w===6?'text-primary':''}">${d}<br><small>(${['日','月','火','水','木','金','土'][w]})</small></th>`);
+            if (i === 0) document.getElementById('currentMonthDisplay').innerText = m + '月';
+            tempDate.setDate(tempDate.getDate() + 1);
         }
-    });
-}
+
+        for (let h = 9; h <= 18; h++) {
+            [0, 30].forEach(m => {
+                if (h === 18 && m > 30) return;
+
+                let timeStr = h + ":" + (m === 0 ? "00" : "30");
+                let isVisible = !(h === 18 && (m === 0 || m === 30));
+
+                let tr = isVisible ? `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>` : '';
+                
+                weekDates.forEach(info => {
+                    let target = new Date(info.dateObj); target.setHours(h, m);
+                    
+                    if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) {
+                        if (isVisible) tr += '<td><div class="time-slot-rest">休</div></td>';
+                    } else if (target < new Date()) {
+                        if (isVisible) tr += '<td><div class="time-slot-ng">-</div></td>';
+                    } else {
+                        let avail = true;
+                        
+                        if (h === 17 && m === 30 && slots > 2) {
+                            avail = false;
+                        }
+
+                        if (avail) {
+                            for(let s=0; s<slots; s++){
+                                let ch = h, cm = m + (s*30);
+                                if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                                
+                                if(bookedTimesSet.has(info.dateKey + " " + ch + ":" + (cm===0?"00":"30")) || (ch > 18 || (ch === 18 && cm > 30))) { 
+                                    avail = false; 
+                                    break; 
+                                }
+                            }
+                        }
+                        
+                        if (isVisible) {
+                            tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
+                        }
+                    }
+                });
+                
+                if (isVisible) {
+                    timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+                }
+            });
+        }
+    }
+
+    function selectSlot(el, date, time) {
+        document.querySelectorAll('.selected-slot').forEach(e => e.classList.remove('selected-slot'));
+        el.parentElement.classList.add('selected-slot');
+        document.getElementById('selected_date').value = date;
+        document.getElementById('selected_time').value = time;
+    }
+
+    function moveWeek(n) { currentBaseDate.setDate(currentBaseDate.getDate() + n); renderWeekCalendar(); }
+    
+    function submitData() {
+        let f = document.getElementById('mainForm');
+        
+        let data = { 
+            date: f.date.value, 
+            time: f.time.value, 
+            name: f.name.value, 
+            menu: f.menu.value, 
+            inquiry: f.inquiry.value, 
+            slots: f.menu.selectedOptions[0].getAttribute('data-slots'),
+            userId: lineUserId,
+            via: "LINE予約" 
+        };
+        
+        if(!data.date || !data.name) return alert("入力不足です");
+        
+        let btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.textContent = "送信中...";
+
+        fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) })
+        .then(res => {
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                throw new Error("系统的URLが古いか、連携が切れています。");
+            }
+            return res.text();
+        })
+        .then(() => { 
+            document.getElementById('booking-form').style.display = 'none';
+            document.getElementById('success-area').style.display = 'block';
+            window.scrollTo(0,0);
+            
+            if (liff && liff.isLoggedIn()) {
+                let msg = "＊＊ご予約内容＊＊\n" +
+                          "お名前：\n" + data.name + "\n" +
+                          "希望日：\n" + data.date + "\n" +
+                          "時間：\n" + data.time + "\n" +
+                          "メニュー：\n" + data.menu + "\n" +
+                          "問い合わせ内容：\n" + (data.inquiry || "なし");
+                
+                liff.sendMessages([{ 'type': 'text', 'text': msg }]).catch(e => console.log(e));
+            }
+        })
+        .catch(err => { 
+            alert("エラーが発生しました: " + err.message); 
+            btn.disabled = false; 
+            btn.textContent = "予約を確定する"; 
+        });
+    }
+
+    function closeLiff() { if (liff) liff.closeWindow(); }
+</script>
+</body>
+</html>
