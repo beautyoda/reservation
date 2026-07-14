@@ -141,16 +141,14 @@
 
         const now = new Date();
 
-        for (let h = 9; h <= 18; h++) {
+        // 営業終了(大引け)は18:30。カレンダーの最終表示行は「17:30」に固定します。
+        for (let h = 9; h <= 17; h++) {
             [0, 30].forEach(m => {
-                if (h === 18 && m > 30) return;
+                // 17:30の枠までを生成対象とし、それ以降の時間は表示させない
+                if (h === 17 && m > 30) return;
 
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
-                // 18:00と18:30の行は画面に表示しない
-                let isVisible = !(h === 18 && (m === 0 || m === 30));
-                let displayStyle = isVisible ? '' : ' style="display:none;"';
-
-                let tr = `<tr${displayStyle}><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
+                let tr = `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
                 
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
@@ -162,17 +160,18 @@
                     } else {
                         let avail = true;
 
-                        // 必要枠数分、未来の枠をチェック
+                        // 必要枠数分の未来の空き状況を、予約データ(Set)から直接検証する
                         for(let s=0; s<slots; s++){
                             let ch = h, cm = m + (s*30);
                             if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
                             
-                            // 営業終了時間（18:30）以降の枠に突入するメニューは一律NG
+                            // 18:30以降にかかる予約は無条件で不可にする
                             if (ch > 18 || (ch === 18 && cm >= 30)) {
                                 avail = false;
                                 break;
                             }
 
+                            // 既存の予約データに登録されているかをチェック
                             let checkTimeStr = ch + ":" + (cm===0?"00":"30");
                             if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) { 
                                 avail = false; 
@@ -189,7 +188,6 @@
         }
     }
 
-    // （以下、変更なしのため省略せずそのまま維持）
     function selectSlot(el, date, time) {
         document.querySelectorAll('.selected-slot').forEach(e => e.classList.remove('selected-slot'));
         el.parentElement.classList.add('selected-slot');
