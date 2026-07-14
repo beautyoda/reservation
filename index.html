@@ -161,26 +161,28 @@
                     } else {
                         let avail = true;
 
-                        // 必要枠数分の検証
-                        for(let s=0; s<slots; s++){
-                            let currentTotalMinutes = (h * 60 + m) + (s * 30);
-                            
-                            // 枠の開始時間が 18:30 以降になる場合は問答無用でアウト
-                            if (currentTotalMinutes >= limitMinutes) {
-                                avail = false;
-                                break;
-                            }
+// メニューごとの最終受付を計算
+const latestStart = limitMinutes - (slots * 30);
 
-                            // 該当枠の 時:分 を算出して既存予約があるかチェック
-                            let ch = Math.floor(currentTotalMinutes / 60);
-                            let cm = currentTotalMinutes % 60;
-                            let checkTimeStr = ch + ":" + cm;
-                            
-                            if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) { 
-                                avail = false; 
-                                break; 
-                            }
-                        }
+if ((h * 60 + m) > latestStart) {
+    avail = false;
+} else {
+
+    // 必要枠数分の検証
+    for (let s = 0; s < slots; s++) {
+
+        let currentTotalMinutes = (h * 60 + m) + (s * 30);
+
+        let ch = Math.floor(currentTotalMinutes / 60);
+        let cm = currentTotalMinutes % 60;
+        let checkTimeStr = ch + ":" + (cm === 0 ? "00" : "30");
+
+        if (bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) {
+            avail = false;
+            break;
+        }
+    }
+}
                         
                         tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
                     }
