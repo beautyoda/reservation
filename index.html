@@ -106,7 +106,6 @@
                     let tParts = p[1].split(':');
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = parseInt(tParts[1]);
-                    // 確実に時間と分を数値にパディングして保管（例: "2026/7/14 18:0" 形式で統一）
                     bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + paddedMin);
                 }
             });
@@ -142,11 +141,11 @@
         }
 
         const now = new Date();
+        const limitMinutes = 18 * 60 + 30; // 18:30 (1110分) が限界値
 
-        // 営業終了(18:30)。表示させる最終行は「17:30」に徹底固定します。
+        // 画面表示は17:30の行まで
         for (let h = 9; h <= 17; h++) {
             [0, 30].forEach(m => {
-                // カレンダーの表示行は、17:30が限界値
                 if (h === 17 && m > 30) return;
 
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
@@ -162,19 +161,21 @@
                     } else {
                         let avail = true;
 
-                        // 必要枠数分の未来の空き状況を検証
+                        // 必要枠数分の検証
                         for(let s=0; s<slots; s++){
-                            let ch = h, cm = m + (s*30);
-                            if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
+                            let currentTotalMinutes = (h * 60 + m) + (s * 30);
                             
-                            // 施術の終了時刻が「18:30」を超える（18:31以降に食い込む）予約は無条件で不可
-                            if (ch > 18 || (ch === 18 && cm > 30)) {
+                            // 枠の開始時間が 18:30 以降になる場合は問答無用でアウト
+                            if (currentTotalMinutes >= limitMinutes) {
                                 avail = false;
                                 break;
                             }
 
-                            // 予約データ（Set）をパディングされた数値形式で確実に照合する
-                            let checkTimeStr = ch + ":" + cm; // "18:0" や "17:30" などの数値形式
+                            // 該当枠の 時:分 を算出して既存予約があるかチェック
+                            let ch = Math.floor(currentTotalMinutes / 60);
+                            let cm = currentTotalMinutes % 60;
+                            let checkTimeStr = ch + ":" + cm;
+                            
                             if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) { 
                                 avail = false; 
                                 break; 
