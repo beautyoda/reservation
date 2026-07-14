@@ -103,7 +103,6 @@
                 if(p[1] === "休") bookedTimesSet.add(normalDate + " 休");
                 else {
                     let tParts = p[1].split(':');
-                    // 分の数値を崩さないよう文字列として結合
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = tParts[1].trim();
                     bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + paddedMin);
@@ -147,6 +146,7 @@
                 if (h === 18 && m > 30) return;
 
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
+                // 18:00と18:30の行は画面に表示しない
                 let isVisible = !(h === 18 && (m === 0 || m === 30));
                 let displayStyle = isVisible ? '' : ' style="display:none;"';
 
@@ -162,12 +162,19 @@
                     } else {
                         let avail = true;
 
+                        // 必要枠数分、未来の枠をチェック
                         for(let s=0; s<slots; s++){
                             let ch = h, cm = m + (s*30);
                             if(cm>=60){ ch += Math.floor(cm/60); cm %= 60; }
                             
+                            // 営業終了時間（18:30）以降の枠に突入するメニューは一律NG
+                            if (ch > 18 || (ch === 18 && cm >= 30)) {
+                                avail = false;
+                                break;
+                            }
+
                             let checkTimeStr = ch + ":" + (cm===0?"00":"30");
-                            if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr) || (ch > 18 || (ch === 18 && cm > 30))) { 
+                            if(bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) { 
                                 avail = false; 
                                 break; 
                             }
@@ -182,6 +189,7 @@
         }
     }
 
+    // （以下、変更なしのため省略せずそのまま維持）
     function selectSlot(el, date, time) {
         document.querySelectorAll('.selected-slot').forEach(e => e.classList.remove('selected-slot'));
         el.parentElement.classList.add('selected-slot');
