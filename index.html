@@ -36,7 +36,7 @@
 <div class="container" id="booking-form">
     <form id="mainForm">
 
-        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：　BEAUTY SALON ODA" required></div>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例： BEAUTY SALON ODA" required></div>
         
         <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
@@ -92,7 +92,7 @@
         fetchBookedData();
     };
 
-function fetchBookedData() {
+    function fetchBookedData() {
         document.getElementById('loadingMsg').style.display = 'block';
         fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
             bookedTimesSet.clear();
@@ -163,28 +163,32 @@ function fetchBookedData() {
                     } else {
                         let avail = true;
 
-// メニューごとの最終受付を計算
-const latestStart = limitMinutes - (slots * 30);
+                        // メニューごとの最終受付を計算
+                        const latestStart = limitMinutes - (slots * 30);
 
-if ((h * 60 + m) > latestStart) {
-    avail = false;
-} else {
+                        if ((h * 60 + m) > latestStart) {
+                            avail = false;
+                        } else {
+                            // 必要枠数分の検証
+                            for (let s = 0; s < slots; s++) {
+                                let currentTotalMinutes = (h * 60 + m) + (s * 30);
 
-    // 必要枠数分の検証
-    for (let s = 0; s < slots; s++) {
+                                // 営業限界の18:30を超えるチェックはNGにする
+                                if (currentTotalMinutes >= limitMinutes) {
+                                    avail = false;
+                                    break;
+                                }
 
-        let currentTotalMinutes = (h * 60 + m) + (s * 30);
+                                let ch = Math.floor(currentTotalMinutes / 60);
+                                let cm = currentTotalMinutes % 60;
+                                let checkTimeStr = ch + ":" + (cm === 0 ? "00" : "30");
 
-        let ch = Math.floor(currentTotalMinutes / 60);
-        let cm = currentTotalMinutes % 60;
-        let checkTimeStr = ch + ":" + (cm === 0 ? "00" : "30");
-
-        if (bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) {
-            avail = false;
-            break;
-        }
-    }
-}
+                                if (bookedTimesSet.has(info.dateKey + " " + checkTimeStr)) {
+                                    avail = false;
+                                    break;
+                                }
+                            }
+                        }
                         
                         tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
                     }
