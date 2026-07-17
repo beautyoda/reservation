@@ -92,7 +92,7 @@
         fetchBookedData();
     };
 
-    function fetchBookedData() {
+function fetchBookedData() {
         document.getElementById('loadingMsg').style.display = 'block';
         fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
             bookedTimesSet.clear();
@@ -106,7 +106,9 @@
                     let tParts = p[1].split(':');
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = parseInt(tParts[1]);
-                    bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + paddedMin);
+                    // 分の数値を「00」または「30」の二桁に確実に整形して保存する
+                    let formattedMin = (paddedMin === 0) ? "00" : "30";
+                    bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + formattedMin);
                 }
             });
             document.getElementById('loadingMsg').style.display = 'none';
