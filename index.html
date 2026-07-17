@@ -36,12 +36,13 @@
 <div class="container" id="booking-form">
     <form id="mainForm">
 
-        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required></div>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例： BEAUTY SALON ODA" required></div>
         
         <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
                 <option value="" data-slots="0">▼メニューを選択してください</option>
                 <option value="カット" data-slots="2">カット</option>
+                <option value="カラー" data-slots="2">カラー</option>
                 <option value="カラー＋カット" data-slots="3">カラー＋カット</option>
                 <option value="パーマ＋カット" data-slots="3">パーマ＋カット</option>
                 <option value="トリートメント" data-slots="2">トリートメント</option>
@@ -106,7 +107,6 @@
                     let tParts = p[1].split(':');
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = parseInt(tParts[1]);
-                    // 分の数値を「00」または「30」の二桁に確実に整形して保存する
                     let formattedMin = (paddedMin === 0) ? "00" : "30";
                     bookedTimesSet.add(normalDate + ' ' + paddedHour + ":" + formattedMin);
                 }
@@ -145,35 +145,36 @@
         const now = new Date();
         const limitMinutes = 18 * 60 + 30; // 18:30 (1110分) が限界値
 
-        // 画面表示は17:30の行まで
-        for (let h = 9; h <= 17; h++) {
+        // ループは18:00まで回す（18:00〜18:30の枠を判定で使えるようにするため）
+        for (let h = 9; h <= 18; h++) {
             [0, 30].forEach(m => {
-                if (h === 17 && m > 30) return;
+                // 18:30以降のデータは作成しない
+                if (h === 18 && m > 0) return;
 
                 let timeStr = h + ":" + (m === 0 ? "00" : "30");
-                let tr = `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>`;
+                
+                // 画面に「行」として表示するのは17:30まで。18:00の行は表示しない
+                let isDisplayedRow = !(h === 18 && m === 0);
+
+                let tr = isDisplayedRow ? `<tr><td style="font-weight:bold; background:#f1f1f1;">${timeStr}</td>` : '';
                 
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
                     
                     if (info.isHoliday || bookedTimesSet.has(info.dateKey + " 休")) {
-                        tr += '<td><div class="time-slot-rest">休</div></td>';
+                        if (isDisplayedRow) tr += '<td><div class="time-slot-rest">休</div></td>';
                     } else if (target < now) {
-                        tr += '<td><div class="time-slot-ng">-</div></td>';
+                        if (isDisplayedRow) tr += '<td><div class="time-slot-ng">-</div></td>';
                     } else {
                         let avail = true;
-
-                        // メニューごとの最終受付を計算
                         const latestStart = limitMinutes - (slots * 30);
 
                         if ((h * 60 + m) > latestStart) {
                             avail = false;
                         } else {
-                            // 必要枠数分の検証
                             for (let s = 0; s < slots; s++) {
                                 let currentTotalMinutes = (h * 60 + m) + (s * 30);
 
-                                // 営業限界の18:30を超えるチェックはNGにする
                                 if (currentTotalMinutes >= limitMinutes) {
                                     avail = false;
                                     break;
@@ -190,11 +191,15 @@
                             }
                         }
                         
-                        tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
+                        if (isDisplayedRow) {
+                            tr += avail ? `<td><div class="time-slot" onclick="selectSlot(this,'${info.dateKey}','${timeStr}')">〇</div></td>` : '<td><div class="time-slot-ng">×</div></td>';
+                        }
                     }
                 });
                 
-                timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+                if (isDisplayedRow) {
+                    timeBody.insertAdjacentHTML('beforeend', tr + '</tr>');
+                }
             });
         }
     }
@@ -206,6 +211,7 @@
         document.getElementById('selected_time').value = time;
     }
 
+    // 移動時にカレンダーを再描画する
     function moveWeek(n) { currentBaseDate.setDate(currentBaseDate.getDate() + n); renderWeekCalendar(); }
     
     function submitData() {
