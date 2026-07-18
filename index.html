@@ -36,7 +36,7 @@
 <div class="container" id="booking-form">
     <form id="mainForm">
 
-        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：　BEAUTY SALON ODA" required></div>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required></div>
         
         <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
@@ -167,7 +167,7 @@
                         if (isDisplayedRow) tr += '<td><div class="time-slot-ng">-</div></td>';
                     } else {
                         let avail = true;
-                        const latestStart = limitMinutes - (slots * 30);
+                        const latestStart = limitMinutes - ((slots - 1) * 30);
 
                         if ((h * 60 + m) > latestStart) {
                             avail = false;
@@ -175,8 +175,7 @@
                             for (let s = 0; s < slots; s++) {
                                 let currentTotalMinutes = (h * 60 + m) + (s * 30);
 
-                                if (currentTotalMinutes >= limitMinutes) {
-                                    avail = false;
+                                if (currentTotalMinutes > limitMinutes) {
                                     break;
                                 }
 
