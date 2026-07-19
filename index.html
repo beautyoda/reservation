@@ -36,7 +36,7 @@
 <div class="container" id="booking-form">
     <form id="mainForm">
 
-        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：　BEAUTY SALON ODA" required></div>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required></div>
         
         <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
@@ -98,9 +98,8 @@
             bookedTimesSet.clear();
             data.forEach(dt => {
                 let p = dt.split(' ');
-                if (!p[1]) return; // 不正データ対策
+                if (!p[1]) return;
 
-                // GAS側から「営業」データが送られてきた場合は、定休日を解除するためのものなのでセットに追加せずスルーする
                 if (p[1] === "営業") {
                     return;
                 }
@@ -112,7 +111,7 @@
                     bookedTimesSet.add(normalDate + " 休");
                 } else {
                     let tParts = p[1].split(':');
-                    if (tParts.length < 2) return; // 不正フォーマット対策
+                    if (tParts.length < 2) return;
                     
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = parseInt(tParts[1]);
@@ -155,9 +154,8 @@
         }
 
         const now = new Date();
-        const limitMinutes = 18 * 60 + 30; // 18:30 (1110分) が限界値
+        const limitMinutes = 18 * 60 + 30;
 
-        // ループは18:00まで回す
         for (let h = 9; h <= 18; h++) {
             [0, 30].forEach(m => {
                 if (h === 18 && m > 0) return;
@@ -170,8 +168,12 @@
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
                     
-                    // 定休曜日であり、かつ台帳に実際に「休」データがある場合のみ「休」表示にする
-                    if (bookedTimesSet.has(info.dateKey + " 休")) {
+                    // 【修正ポイント】
+                    // GASからデータが届いている（3ヶ月以内）場合はそのデータに従う。
+                    // 3ヶ月以上先でGASに「休」データがない場合でも、カレンダーの曜日計算（isHolidayRow）が真なら一律「休」として扱う。
+                    let isRestDay = bookedTimesSet.has(info.dateKey + " 休") || (info.isHolidayRow && !bookedTimesSet.has(info.dateKey + " 営業"));
+
+                    if (isRestDay) {
                         if (isDisplayedRow) tr += '<td><div class="time-slot-rest">休</div></td>';
                     } else if (target < now) {
                         if (isDisplayedRow) tr += '<td><div class="time-slot-ng">-</div></td>';
@@ -180,7 +182,6 @@
                         const currentMinutes = h * 60 + m;
                         const latestStart = limitMinutes - ((slots - 1) * 30);
 
-                        // 17:30 (1050分) の時は2枠(slots=2)のメニューのみ許可。3枠以上は不可。
                         if (currentMinutes === 1050 && slots > 2) {
                             avail = false;
                         } else if (currentMinutes > latestStart) {
