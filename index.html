@@ -75,6 +75,7 @@
     
     const LIFF_ID = "1660734162-KM7yyz77";
     let bookedTimesSet = new Set();
+    let specialOpenDaysSet = new Set(); // 特別営業日用のセットを追加
     let currentBaseDate = new Date();
     
     let lineUserId = ""; 
@@ -96,17 +97,20 @@
         document.getElementById('loadingMsg').style.display = 'block';
         fetch(GAS_API_URL + '?p=json').then(res => res.json()).then(data => {
             bookedTimesSet.clear();
+            specialOpenDaysSet.clear(); // クリア
             data.forEach(dt => {
                 let p = dt.split(' ');
                 if (!p[1]) return;
 
+                let dParts = p[0].split('/');
+                let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
+
+                // 「営業」フラグが届いた日付は特別営業日セットに保存してスルーする
                 if (p[1] === "営業") {
+                    specialOpenDaysSet.add(normalDate);
                     return;
                 }
 
-                let dParts = p[0].split('/');
-                let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
-                
                 if(p[1] === "休") {
                     bookedTimesSet.add(normalDate + " 休");
                 } else {
@@ -144,7 +148,6 @@
             let m = tempDate.getMonth() + 1, d = tempDate.getDate(), w = tempDate.getDay();
             let dateKey = tempDate.getFullYear() + '/' + m + '/' + d;
             
-            // 定休日の曜日ロジックに該当するかどうかの判定
             let isHolidayRow = (w === 1 || (w === 2 && d >= 15 && d <= 21));
             
             weekDates.push({ dateKey, isHolidayRow, dateObj: new Date(tempDate) });
@@ -168,10 +171,16 @@
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
                     
-                    // 【修正ポイント】
-                    // GASからデータが届いている（3ヶ月以内）場合はそのデータに従う。
-                    // 3ヶ月以上先でGASに「休」データがない場合でも、カレンダーの曜日計算（isHolidayRow）が真なら一律「休」として扱う。
-                    let isRestDay = bookedTimesSet.has(info.dateKey + " 休") || (info.isHolidayRow && !bookedTimesSet.has(info.dateKey + " 営業"));
+                    // 【最優先】GASから明示的に「営業」データがある場合は定休日判定を完全にスキップする
+                    let isRestDay = false;
+                    if (!specialOpenDaysSet.has(info.dateKey)) {
+                        isRestDay = bookedTimesSet.has(info.dateKey + " 休") || info.isHolidayRow;
+                    } else {
+                        // 特別営業日であっても個別に「休」データが台帳にあれば休みとする
+                        if (bookedTimesSet.has(info.dateKey + " 休")) {
+                            isRestDay = true;
+                        }
+                    }
 
                     if (isRestDay) {
                         if (isDisplayedRow) tr += '<td><div class="time-slot-rest">休</div></td>';
