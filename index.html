@@ -160,20 +160,24 @@
                 weekDates.forEach(info => {
                     let target = new Date(info.dateObj); target.setHours(h, m);
                     
-                    // 【修正】定休曜日であり、かつ台帳に実際に「休」データがある場合のみ「休」表示にする（特別営業日はスルー）
+                    // 定休曜日であり、かつ台帳に実際に「休」データがある場合のみ「休」表示にする
                     if (bookedTimesSet.has(info.dateKey + " 休")) {
                         if (isDisplayedRow) tr += '<td><div class="time-slot-rest">休</div></td>';
                     } else if (target < now) {
                         if (isDisplayedRow) tr += '<td><div class="time-slot-ng">-</div></td>';
                     } else {
                         let avail = true;
+                        const currentMinutes = h * 60 + m;
                         const latestStart = limitMinutes - ((slots - 1) * 30);
 
-                        if ((h * 60 + m) > latestStart) {
+                        // 17:30 (1050分) の時は2枠(slots=2)のメニューのみ許可。3枠以上は不可。
+                        if (currentMinutes === 1050 && slots > 2) {
+                            avail = false;
+                        } else if (currentMinutes > latestStart) {
                             avail = false;
                         } else {
                             for (let s = 0; s < slots; s++) {
-                                let currentTotalMinutes = (h * 60 + m) + (s * 30);
+                                let currentTotalMinutes = currentMinutes + (s * 30);
 
                                 if (currentTotalMinutes > limitMinutes) {
                                     break;
