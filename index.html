@@ -36,7 +36,7 @@
 <div class="container" id="booking-form">
     <form id="mainForm">
 
-        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：BEAUTY SALON ODA" required></div>
+        <div class="form-group"><label>お名前<span class="required-badge">必須</span></label><input type="text" name="name" class="form-control" placeholder="例：　BEAUTY SALON ODA" required></div>
         
         <div class="form-group"><label>メニュー<span class="required-badge">必須</span></label>
             <select name="menu" id="menuInput" class="form-control" required onchange="renderWeekCalendar()">
@@ -98,12 +98,22 @@
             bookedTimesSet.clear();
             data.forEach(dt => {
                 let p = dt.split(' ');
+                if (!p[1]) return; // 不正データ対策
+
+                // GAS側から「営業」データが送られてきた場合は、定休日を解除するためのものなのでセットに追加せずスルーする
+                if (p[1] === "営業") {
+                    return;
+                }
+
                 let dParts = p[0].split('/');
                 let normalDate = parseInt(dParts[0]) + '/' + parseInt(dParts[1]) + '/' + parseInt(dParts[2]);
+                
                 if(p[1] === "休") {
                     bookedTimesSet.add(normalDate + " 休");
                 } else {
                     let tParts = p[1].split(':');
+                    if (tParts.length < 2) return; // 不正フォーマット対策
+                    
                     let paddedHour = parseInt(tParts[0]);
                     let paddedMin = parseInt(tParts[1]);
                     let formattedMin = (paddedMin === 0) ? "00" : "30";
